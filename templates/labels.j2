@@ -1,0 +1,45 @@
+{% if focalboard_container_labels_traefik_enabled %}
+traefik.enable=true
+
+{% if focalboard_container_labels_traefik_docker_network %}
+traefik.docker.network={{ focalboard_container_labels_traefik_docker_network }}
+{% endif %}
+
+{% set middlewares = [] %}
+
+{% if focalboard_container_labels_traefik_path_prefix != '/' %}
+traefik.http.middlewares.{{ focalboard_identifier }}-slashless-redirect.redirectregex.regex=({{ focalboard_container_labels_traefik_path_prefix | quote }})$
+traefik.http.middlewares.{{ focalboard_identifier }}-slashless-redirect.redirectregex.replacement=${1}/
+{% set middlewares = middlewares + [focalboard_identifier + '-slashless-redirect'] %}
+{% endif %}
+
+{% if focalboard_container_labels_traefik_path_prefix != '/' %}
+traefik.http.middlewares.{{ focalboard_identifier }}-strip-prefix.stripprefix.prefixes={{ focalboard_container_labels_traefik_path_prefix }}
+{% set middlewares = middlewares + [focalboard_identifier + '-strip-prefix'] %}
+{% endif %}
+
+{% if focalboard_container_labels_traefik_additional_response_headers.keys() | length > 0 %}
+{% for name, value in focalboard_container_labels_traefik_additional_response_headers.items() %}
+traefik.http.middlewares.{{ focalboard_identifier }}-add-headers.headers.customresponseheaders.{{ name }}={{ value }}
+{% endfor %}
+{% set middlewares = middlewares + [focalboard_identifier + '-add-headers'] %}
+{% endif %}
+
+traefik.http.routers.{{ focalboard_identifier }}.rule={{ focalboard_container_labels_traefik_rule }}
+{% if focalboard_container_labels_traefik_priority | int > 0 %}
+traefik.http.routers.{{ focalboard_identifier }}.priority={{ focalboard_container_labels_traefik_priority }}
+{% endif %}
+traefik.http.routers.{{ focalboard_identifier }}.service={{ focalboard_identifier }}
+{% if middlewares | length > 0 %}
+traefik.http.routers.{{ focalboard_identifier }}.middlewares={{ middlewares | join(',') }}
+{% endif %}
+traefik.http.routers.{{ focalboard_identifier }}.entrypoints={{ focalboard_container_labels_traefik_entrypoints }}
+traefik.http.routers.{{ focalboard_identifier }}.tls={{ focalboard_container_labels_traefik_tls | to_json }}
+{% if focalboard_container_labels_traefik_tls %}
+traefik.http.routers.{{ focalboard_identifier }}.tls.certResolver={{ focalboard_container_labels_traefik_tls_certResolver }}
+{% endif %}
+
+traefik.http.services.{{ focalboard_identifier }}.loadbalancer.server.port={{ focalboard_config_virtual_port }}
+{% endif %}
+
+{{ focalboard_container_labels_additional_labels }}

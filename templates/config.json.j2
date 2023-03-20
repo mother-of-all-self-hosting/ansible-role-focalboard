@@ -1,0 +1,26 @@
+{
+	"serverRoot": {{ focalboard_config_serverRoot | to_json }},
+	"port": {{ focalboard_config_port }},
+
+	"dbtype": {{ focalboard_config_dbtype | to_json }},
+	"dbconfig": {{ focalboard_config_dbconfig | to_json }},
+
+	"useSSL": false,
+	"webpath": "./pack",
+	"filesdriver": "local",
+	"filespath": "/data/files",
+	"telemetry": {{ focalboard_config_telemetry | to_json }},
+	"prometheusaddress": ":9092",
+	"webhook_update": [],
+	"session_expire_time": 2592000,
+	"session_refresh_time": 18000,
+	"localOnly": false,
+
+	"enableLocalMode": {{ focalboard_config_enableLocalMode | to_json }},
+	"localModeSocketLocation": "/data/focalboard_local.socket",
+
+	"authMode": "native",
+	"logging_cfg_file": "",
+	"audit_cfg_file": "",
+	"enablePublicSharedBoards": {{ focalboard_config_enablePublicSharedBoards | to_json }}
+}

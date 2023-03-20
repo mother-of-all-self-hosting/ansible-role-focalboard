@@ -1,0 +1,26 @@
+---
+
+- name: Check existence of Focalboard systemd service
+  ansible.builtin.stat:
+    path: "{{ devture_systemd_docker_base_systemd_path }}/{{ focalboard_identifier }}.service"
+  register: focalboard_service_stat
+
+- when: focalboard_service_stat.stat.exists | bool
+  block:
+    - name: Ensure Focalboard systemd service is stopped
+      ansible.builtin.service:
+        name: "{{ focalboard_identifier }}"
+        state: stopped
+        enabled: false
+        daemon_reload: true
+
+    - name: Ensure Focalboard systemd service does not exists
+      ansible.builtin.file:
+        path: "{{ devture_systemd_docker_base_systemd_path }}/{{ focalboard_identifier }}.service"
+        state: absent
+
+    - name: Ensure Focalboard files deleted
+      ansible.builtin.file:
+        path: "{{ focalboard_base_path }}"
+        state: absent
+

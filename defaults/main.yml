@@ -1,0 +1,225 @@
+---
+# Project source code URL: https://github.com/mattermost/focalboard
+
+focalboard_enabled: true
+
+focalboard_identifier: focalboard
+
+# The fully-qualified name of your Focalboard server (e.g. `focalboard.example.com`)
+focalboard_hostname: ''
+
+# The path at which Focalboard is served.
+# This value must either be `/` or not end with a slash (e.g. `/focalboard`).
+focalboard_path_prefix: /
+
+focalboard_version: 7.8.0
+
+focalboard_uid: ''
+focalboard_gid: ''
+
+focalboard_base_path: "/{{ focalboard_identifier }}"
+focalboard_data_path: "{{ focalboard_base_path }}/data"
+focalboard_config_path: "{{ focalboard_base_path }}/config"
+
+focalboard_container_image: "{{ focalboard_container_image_registry_prefix }}mattermost/focalboard:{{ focalboard_container_image_tag }}"
+focalboard_container_image_tag: "{{ focalboard_version }}"
+focalboard_container_image_force_pull: "{{ focalboard_container_image.endswith(':latest') }}"
+focalboard_container_image_registry_prefix: docker.io/
+
+focalboard_container_network: "{{ focalboard_identifier }}"
+
+# A list of additional container networks that the container would be connected to.
+# The playbook does not create these networks, so make sure they already exist.
+focalboard_container_additional_networks: []
+
+# focalboard_container_labels_traefik_enabled controls whether labels to assist a Traefik reverse-proxy will be attached to the container.
+# See `../templates/labels.j2` for details.
+#
+# To inject your own other container labels, see `focalboard_container_labels_additional_labels`.
+focalboard_container_labels_traefik_enabled: true
+focalboard_container_labels_traefik_docker_network: "{{ focalboard_container_network }}"
+focalboard_container_labels_traefik_hostname: "{{ focalboard_hostname }}"
+# The path prefix must either be `/` or not end with a slash (e.g. `/focalboard`).
+focalboard_container_labels_traefik_path_prefix: "{{ focalboard_path_prefix }}"
+focalboard_container_labels_traefik_rule: "Host(`{{ focalboard_container_labels_traefik_hostname }}`){% if focalboard_container_labels_traefik_path_prefix != '/' %} && PathPrefix(`{{ focalboard_container_labels_traefik_path_prefix }}`){% endif %}"
+focalboard_container_labels_traefik_priority: 0
+focalboard_container_labels_traefik_entrypoints: web-secure
+focalboard_container_labels_traefik_tls: "{{ focalboard_container_labels_traefik_entrypoints != 'web' }}"
+focalboard_container_labels_traefik_tls_certResolver: default  # noqa var-naming
+
+# Controls which additional headers to attach to all HTTP responses.
+# To add your own headers, use `focalboard_container_labels_traefik_additional_response_headers_custom`
+focalboard_container_labels_traefik_additional_response_headers: "{{ focalboard_container_labels_traefik_additional_response_headers_auto | combine(focalboard_container_labels_traefik_additional_response_headers_custom) }}"
+focalboard_container_labels_traefik_additional_response_headers_auto: |
+  {{
+    {}
+    | combine ({'X-XSS-Protection': focalboard_http_header_xss_protection} if focalboard_http_header_xss_protection else {})
+    | combine ({'X-Frame-Options': focalboard_http_header_frame_options} if focalboard_http_header_frame_options else {})
+    | combine ({'X-Content-Type-Options': focalboard_http_header_content_type_options} if focalboard_http_header_content_type_options else {})
+    | combine ({'Content-Security-Policy': focalboard_http_header_content_security_policy} if focalboard_http_header_content_security_policy else {})
+    | combine ({'Permission-Policy': focalboard_http_header_content_permission_policy} if focalboard_http_header_content_permission_policy else {})
+    | combine ({'Strict-Transport-Security': focalboard_http_header_strict_transport_security} if focalboard_http_header_strict_transport_security and focalboard_container_labels_traefik_tls else {})
+  }}
+focalboard_container_labels_traefik_additional_response_headers_custom: {}
+
+# focalboard_container_http_bind_port controls whether (and how) the container exposes its HTTP port (`focalboard_config_virtual_port`).
+# Leave empty to not expose it.
+# Example values: `127.0.0.1:8080`, `0.0.0.0:8080`, `8080`.
+focalboard_container_http_bind_port: ''
+
+# focalboard_container_labels_additional_labels contains a multiline string with additional labels to add to the container label file.
+# See `../templates/labels.j2` for details.
+#
+# Example:
+# focalboard_container_labels_additional_labels: |
+#   my.label=1
+#   another.label="here"
+focalboard_container_labels_additional_labels: ''
+
+# focalboard_container_additional_environment_variables contains a multiline string with additional environment variables to pass to the container.
+#
+# Example:
+# focalboard_container_additional_environment_variables: |
+#   VAR=1
+#   ANOTHER=value
+focalboard_container_additional_environment_variables: ''
+
+focalboard_systemd_required_systemd_services_list: ['docker.service']
+
+focalboard_database_type: sqlite
+focalboard_database_hostname: ''
+focalboard_database_port: 5432
+focalboard_database_name: focalboard
+focalboard_database_username: focalboard
+focalboard_database_password: ''
+# Use this to set the sslmode parameter of the SSL connection
+# By default, we expect a local container (without SSL), so attempting SSL connections is not necessary.
+focalboard_database_sslmode: disable
+
+# Configuration parameters seen below are documented here:
+# https://github.com/mattermost/focalboard/blob/main/website/site/content/guide/admin/_index.md
+
+# focalboard_config_serverRoot controls the serverRoot configuration parameter
+focalboard_config_serverRoot: "https://{{ focalboard_hostname }}{{ focalboard_path_prefix }}"  # noqa var-naming
+
+# focalboard_config_port controls the port configuration parameter
+focalboard_config_port: "{{ focalboard_config_virtual_port }}"
+
+# focalboard_config_dbtype controls the dbtype configuration parameter
+focalboard_config_dbtype: |-
+  {{
+    {
+      'postgres': 'postgres',
+      'sqlite': 'sqlite3',
+    }[focalboard_database_type]
+  }}
+
+# focalboard_config_dbconfig controls the dbconfig configuration parameter
+focalboard_config_dbconfig: |-
+  {{
+    {
+      'postgres': ('postgres://' + focalboard_database_username + ':' + focalboard_database_password + '@' + focalboard_database_hostname + ':' + focalboard_database_port | string + '/' + focalboard_database_name + '?sslmode=' + focalboard_database_sslmode),
+      'sqlite': '/data/focalboard.db?_busy_timeout=5000',
+    }[focalboard_database_type]
+  }}
+
+# focalboard_config_telemetry controls the telemetry configuration parameter
+focalboard_config_telemetry: false
+
+# focalboard_config_enableLocalMode controls the enableLocalMode configuration parameter
+focalboard_config_enableLocalMode: false  # noqa var-naming
+
+# focalboard_config_enablePublicSharedBoards controls the enablePublicSharedBoards configuration parameter
+# Enable publishing boards for public access
+focalboard_config_enablePublicSharedBoards: false  # noqa var-naming
+
+# Default Focalboard configuration template which covers the generic use case.
+# You can customize it by controlling the various variables inside it.
+#
+# For a more advanced customization, you can extend the default (see `focalboard_configuration_extension_json`)
+# or completely replace this variable with your own template.
+#
+# The side-effect of this lookup is that Ansible would even parse the JSON for us, returning a dict.
+# This is unlike what it does when looking up YAML template files (no automatic parsing there).
+focalboard_configuration_default: "{{ lookup('template', 'templates/config.json.j2') }}"
+
+# Your custom JSON configuration for Element should go to `focalboard_configuration_extension_json`.
+# This configuration extends the default starting configuration (`focalboard_configuration_default`).
+#
+# You can override individual variables from the default configuration, or introduce new ones.
+#
+# If you need something more special, you can take full control by
+# completely redefining `focalboard_configuration_default`.
+#
+# Example configuration extension follows:
+#
+# focalboard_configuration_extension_json: |
+#  {
+#  "session_expire_time": 60,
+#  "session_refresh_time": 5
+#  }
+focalboard_configuration_extension_json: '{}'
+
+focalboard_configuration_extension: "{{ focalboard_configuration_extension_json | from_json if focalboard_configuration_extension_json | from_json is mapping else {} }}"
+
+# Holds the final Element configuration (a combination of the default and its extension).
+# You most likely don't need to touch this variable. Instead, see `focalboard_configuration_default`.
+focalboard_configuration: "{{ focalboard_configuration_default | combine(focalboard_configuration_extension, recursive=True) }}"
+
+# focalboard_config_virtual_host controls the VIRTUAL_HOST environment variable
+focalboard_config_virtual_host: "{{ focalboard_hostname }}"
+
+# focalboard_config_virtual_port controls the VIRTUAL_PORT environment variable,
+# which controls Focalboard's HTTP port in the container
+focalboard_config_virtual_port: 8080
+
+# Specifies the value of the `X-XSS-Protection` header
+# Stops pages from loading when they detect reflected cross-site scripting (XSS) attacks.
+#
+# Learn more about it is here:
+# - https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-XSS-Protection
+# - https://portswigger.net/web-security/cross-site-scripting/reflected
+focalboard_http_header_xss_protection: "1; mode=block"
+
+# Specifies the value of the `X-Frame-Options` header which controls whether framing can happen.
+# See: https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-Frame-Options
+focalboard_http_header_frame_options: SAMEORIGIN
+
+# Specifies the value of the `X-Content-Type-Options` header.
+# See: https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-Content-Type-Options
+focalboard_http_header_content_type_options: nosniff
+
+# Specifies the value of the `Content-Security-Policy` header.
+# See: https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy
+focalboard_http_header_content_security_policy: frame-ancestors 'self'
+
+# Specifies the value of the `Permission-Policy` header.
+# See: https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Permission-Policy
+focalboard_http_header_content_permission_policy: "{{ 'interest-cohort=()' if focalboard_floc_optout_enabled else '' }}"
+
+# Specifies the value of the `Strict-Transport-Security` header.
+# See: https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Strict-Transport-Security
+focalboard_http_header_strict_transport_security: "max-age=31536000; includeSubDomains{{ '; preload' if focalboard_hsts_preload_enabled else '' }}"
+
+# Controls whether to send a "Permissions-Policy interest-cohort=();" header along with all responses
+#
+# Learn more about what it is here:
+# - https://www.eff.org/deeplinks/2021/03/googles-floc-terrible-idea
+# - https://paramdeo.com/blog/opting-your-website-out-of-googles-floc-network
+# - https://amifloced.org/
+#
+# Of course, a better solution is to just stop using browsers (like Chrome), which participate in such tracking practices.
+# See: `focalboard_content_permission_policy`
+focalboard_floc_optout_enabled: true
+
+# Controls if HSTS preloading is enabled
+#
+# In its strongest and recommended form, the [HSTS policy](https://www.chromium.org/hsts) includes all subdomains, and
+# indicates a willingness to be "preloaded" into browsers:
+# `Strict-Transport-Security: max-age=31536000; includeSubDomains; preload`
+# For more information visit:
+# - https://en.wikipedia.org/wiki/HTTP_Strict_Transport_Security
+# - https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Strict-Transport-Security
+# - https://hstspreload.org/#opt-in
+# See: `focalboard_http_header_strict_transport_security`
+focalboard_hsts_preload_enabled: false

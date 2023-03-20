@@ -1,0 +1,47 @@
+---
+
+- name: Fail if required Focalboard settings not defined
+  ansible.builtin.fail:
+    msg: >-
+      You need to define a required configuration setting (`{{ item }}`) for using this role.
+  when: "vars[item] == ''"
+  with_items:
+    - focalboard_hostname
+    - focalboard_path_prefix
+    - focalboard_uid
+    - focalboard_gid
+
+- name: Fail if Focalboard database type invalid
+  ansible.builtin.fail:
+    msg: >-
+      focalboard_database_type must be 'postgres' or 'sqlite'
+  when: "focalboard_database_type not in ['postgres', 'sqlite']"
+
+- name: Fail if required Focalboard + Postgres integration settings not defined
+  ansible.builtin.fail:
+    msg: >-
+      You need to define a required configuration setting (`{{ item }}`) when `focalboard_database_type` is `postgres`
+  when: "focalboard_database_type == 'postgres' and vars[item] == ''"
+  with_items:
+    - focalboard_database_username
+    - focalboard_database_password
+
+- when: focalboard_container_labels_traefik_enabled | bool
+  block:
+    - name: Fail if required Focalboard Traefik settings not defined
+      ansible.builtin.fail:
+        msg: >-
+          You need to define a required configuration setting (`{{ item }}`).
+      when: "vars[item] == ''"
+      with_items:
+        - focalboard_container_labels_traefik_hostname
+        - focalboard_container_labels_traefik_path_prefix
+
+    # We ensure it doesn't end with a slash, because we handle both (slash and no-slash).
+    # Knowing that `focalboard_container_labels_traefik_path_prefix` does not end with a slash
+    # ensures we know how to set these routes up without having to do "does it end with a slash" checks elsewhere.
+    - name: Fail if focalboard_container_labels_traefik_path_prefix ends with a slash
+      ansible.builtin.fail:
+        msg: >-
+          focalboard_container_labels_traefik_path_prefix (`{{ focalboard_container_labels_traefik_path_prefix }}`) must either be `/` or not end with a slash (e.g. `/focalboard`).
+      when: "focalboard_container_labels_traefik_path_prefix != '/' and focalboard_container_labels_traefik_path_prefix[-1] == '/'"
