@@ -30,7 +30,9 @@ focalboard_container_network: "{{ focalboard_identifier }}"
 
 # A list of additional container networks that the container would be connected to.
 # The playbook does not create these networks, so make sure they already exist.
-focalboard_container_additional_networks: []
+focalboard_container_additional_networks: "{{ focalboard_container_additional_networks_auto + focalboard_container_additional_networks_custom }}"
+focalboard_container_additional_networks_auto: []
+focalboard_container_additional_networks_custom: []
 
 # focalboard_container_labels_traefik_enabled controls whether labels to assist a Traefik reverse-proxy will be attached to the container.
 # See `../templates/labels.j2` for details.
@@ -84,7 +86,10 @@ focalboard_container_labels_additional_labels: ''
 #   ANOTHER=value
 focalboard_container_additional_environment_variables: ''
 
-focalboard_systemd_required_systemd_services_list: ['docker.service']
+focalboard_systemd_required_systemd_services_list: "{{ focalboard_systemd_required_systemd_services_list_default + focalboard_systemd_required_systemd_services_list_auto + focalboard_systemd_required_systemd_services_list_custom }}"
+focalboard_systemd_required_systemd_services_list_default: ['docker.service']
+focalboard_systemd_required_systemd_services_list_auto: []
+focalboard_systemd_required_systemd_services_list_custom: []
 
 focalboard_database_type: sqlite
 focalboard_database_hostname: ''
