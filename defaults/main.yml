@@ -12,7 +12,7 @@ focalboard_hostname: ''
 # This value must either be `/` or not end with a slash (e.g. `/focalboard`).
 focalboard_path_prefix: /
 
-focalboard_version: 7.8.0
+focalboard_version: 7.9.3
 
 focalboard_uid: ''
 focalboard_gid: ''
