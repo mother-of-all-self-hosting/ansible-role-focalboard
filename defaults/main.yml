@@ -105,7 +105,7 @@ focalboard_database_sslmode: disable
 # https://github.com/mattermost/focalboard/blob/main/website/site/content/guide/admin/_index.md
 
 # focalboard_config_serverRoot controls the serverRoot configuration parameter
-focalboard_config_serverRoot: "https://{{ focalboard_hostname }}{{ focalboard_path_prefix }}"  # noqa var-naming
+focalboard_config_serverRoot: "https://{{ focalboard_hostname }}{% if focalboard_path_prefix != '/' %}{{ focalboard_path_prefix }}{% endif %}"  # noqa var-naming
 
 # focalboard_config_port controls the port configuration parameter
 focalboard_config_port: "{{ focalboard_config_virtual_port }}"
