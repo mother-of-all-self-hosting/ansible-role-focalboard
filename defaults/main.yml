@@ -102,6 +102,9 @@ focalboard_systemd_required_services_list_default: "{{ [devture_systemd_docker_b
 focalboard_systemd_required_services_list_auto: []
 focalboard_systemd_required_services_list_custom: []
 
+# List of systemd services that the Focalboard systemd service wants
+focalboard_systemd_wanted_services_list: []
+
 focalboard_database_type: sqlite
 focalboard_database_hostname: ''
 focalboard_database_port: 5432
