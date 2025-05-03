@@ -1,5 +1,9 @@
-# SPDX-FileCopyrightText: 2023 Slavi Pantaleev
 # SPDX-FileCopyrightText: 2023 westerguard
+# SPDX-FileCopyrightText: 2023 - 2024 Nikita Chernyi
+# SPDX-FileCopyrightText: 2023 - 2025 Slavi Pantaleev
+# SPDX-FileCopyrightText: 2024 Sergio Durigan Junior
+# SPDX-FileCopyrightText: 2025 MASH project contributors
+# SPDX-FileCopyrightText: 2025 Suguru Hirahara
 #
 # SPDX-License-Identifier: AGPL-3.0-or-later
 
@@ -28,8 +32,10 @@ focalboard_config_path: "{{ focalboard_base_path }}/config"
 
 focalboard_container_image: "{{ focalboard_container_image_registry_prefix }}mattermost/focalboard:{{ focalboard_container_image_tag }}"
 focalboard_container_image_tag: "{{ focalboard_version }}"
+focalboard_container_image_registry_prefix: "{{ focalboard_container_image_registry_prefix_upstream }}"
+focalboard_container_image_registry_prefix_upstream: "{{ focalboard_container_image_registry_prefix_upstream_default }}"
+focalboard_container_image_registry_prefix_upstream_default: docker.io/
 focalboard_container_image_force_pull: "{{ focalboard_container_image.endswith(':latest') }}"
-focalboard_container_image_registry_prefix: docker.io/
 
 focalboard_container_network: "{{ focalboard_identifier }}"
 
