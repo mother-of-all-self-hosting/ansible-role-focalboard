@@ -97,10 +97,11 @@ focalboard_container_labels_additional_labels: ''
 #   ANOTHER=value
 focalboard_container_additional_environment_variables: ''
 
-focalboard_systemd_required_systemd_services_list: "{{ focalboard_systemd_required_systemd_services_list_default + focalboard_systemd_required_systemd_services_list_auto + focalboard_systemd_required_systemd_services_list_custom }}"
-focalboard_systemd_required_systemd_services_list_default: ['docker.service']
-focalboard_systemd_required_systemd_services_list_auto: []
-focalboard_systemd_required_systemd_services_list_custom: []
+# List of systemd services that the Focalboard systemd service depends on
+focalboard_systemd_required_services_list: "{{ focalboard_systemd_required_services_list_default + focalboard_systemd_required_services_list_auto + focalboard_systemd_required_services_list_custom }}"
+focalboard_systemd_required_services_list_default: "{{ [devture_systemd_docker_base_docker_service_name] if devture_systemd_docker_base_docker_service_name else [] }}"
+focalboard_systemd_required_services_list_auto: []
+focalboard_systemd_required_services_list_custom: []
 
 focalboard_database_type: sqlite
 focalboard_database_hostname: ''
