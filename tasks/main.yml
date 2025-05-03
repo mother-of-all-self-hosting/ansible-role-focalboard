@@ -16,7 +16,6 @@
     - when: focalboard_enabled | bool
       ansible.builtin.include_tasks: "{{ role_path }}/tasks/install.yml"
 
-
 - tags:
     - setup-all
     - setup-focalboard
