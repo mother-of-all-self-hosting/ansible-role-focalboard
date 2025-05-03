@@ -25,6 +25,8 @@ focalboard_gid: ''
 # The fully-qualified name of your Focalboard server (e.g. `focalboard.example.com`)
 focalboard_hostname: ''
 
+focalboard_scheme: https
+
 # The path at which Focalboard is served.
 # This value must either be `/` or not end with a slash (e.g. `/focalboard`).
 focalboard_path_prefix: /
@@ -164,7 +166,7 @@ focalboard_config_virtual_host: "{{ focalboard_hostname }}"
 focalboard_config_virtual_port: 8080
 
 # focalboard_config_serverRoot controls the serverRoot configuration parameter
-focalboard_config_serverRoot: "https://{{ focalboard_hostname }}{% if focalboard_path_prefix != '/' %}{{ focalboard_path_prefix }}{% endif %}"  # noqa var-naming
+focalboard_config_serverRoot: "{{ focalboard_scheme }}://{{ focalboard_hostname }}{% if focalboard_path_prefix != '/' %}{{ focalboard_path_prefix }}{% endif %}"  # noqa var-naming
 
 # focalboard_config_port controls the port configuration parameter
 focalboard_config_port: "{{ focalboard_config_virtual_port }}"
