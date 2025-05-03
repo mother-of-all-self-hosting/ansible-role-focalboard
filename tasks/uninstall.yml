@@ -27,4 +27,3 @@
       ansible.builtin.file:
         path: "{{ focalboard_base_path }}"
         state: absent
-
