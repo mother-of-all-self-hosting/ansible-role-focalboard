@@ -49,6 +49,6 @@
 
 - name: Ensure Focalboard systemd service installed
   ansible.builtin.template:
-    src: "{{ role_path }}/templates/focalboard.service.j2"
+    src: "{{ role_path }}/templates/systemd/focalboard.service.j2"
     dest: "{{ devture_systemd_docker_base_systemd_path }}/{{ focalboard_identifier }}.service"
     mode: 0640
