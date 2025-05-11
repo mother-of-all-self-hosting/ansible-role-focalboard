@@ -207,9 +207,6 @@ focalboard_config_enablePublicSharedBoards: false  # noqa var-naming
 #
 # For a more advanced customization, you can extend the default (see `focalboard_configuration_extension_json`)
 # or completely replace this variable with your own template.
-#
-# The side-effect of this lookup is that Ansible would even parse the JSON for us, returning a dict.
-# This is unlike what it does when looking up YAML template files (no automatic parsing there).
 focalboard_configuration_default: "{{ lookup('template', 'templates/config.json.j2') }}"
 
 # Your custom JSON configuration for Element should go to `focalboard_configuration_extension_json`.
