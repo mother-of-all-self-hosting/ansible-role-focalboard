@@ -18,7 +18,7 @@ focalboard_data_path: "{{ focalboard_base_path }}/data"
 focalboard_config_path: "{{ focalboard_base_path }}/config"
 
 # renovate: datasource=docker depName=mattermost/focalboard versioning=semver
-focalboard_version: 7.10.4
+focalboard_version: 7.11.4
 
 focalboard_uid: ''
 focalboard_gid: ''
