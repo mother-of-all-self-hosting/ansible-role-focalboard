@@ -16,7 +16,7 @@
     - "{{ focalboard_data_path }}"
     - "{{ focalboard_config_path }}"
 
-- name: Ensure Focalboard support files created
+- name: Ensure Focalboard support files installed
   ansible.builtin.template:
     src: "{{ role_path }}/templates/{{ item }}.j2"
     dest: "{{ focalboard_base_path }}/{{ item }}"
@@ -49,7 +49,7 @@
     driver: bridge
     driver_options: "{{ devture_systemd_docker_base_container_networks_driver_options }}"
 
-- name: Ensure Focalboard systemd service installed
+- name: Ensure Focalboard systemd service is present
   ansible.builtin.template:
     src: "{{ role_path }}/templates/systemd/focalboard.service.j2"
     dest: "{{ devture_systemd_docker_base_systemd_path }}/{{ focalboard_identifier }}.service"
