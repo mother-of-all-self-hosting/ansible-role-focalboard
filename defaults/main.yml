@@ -235,10 +235,10 @@ focalboard_configuration_extension: "{{ focalboard_configuration_extension_json 
 # You most likely don't need to touch this variable. Instead, see `focalboard_configuration_default`.
 focalboard_configuration: "{{ focalboard_configuration_default | combine(focalboard_configuration_extension, recursive=True) }}"
 
-# focalboard_container_additional_environment_variables contains a multiline string with additional environment variables to pass to the container.
+# focalboard_environment_variables_additional_variables contains a multiline string with additional environment variables to pass to the container.
 #
 # Example:
-# focalboard_container_additional_environment_variables: |
+# focalboard_environment_variables_additional_variables: |
 #   VAR=1
 #   ANOTHER=value
-focalboard_container_additional_environment_variables: ''
+focalboard_environment_variables_additional_variables: ''
