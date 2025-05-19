@@ -4,11 +4,14 @@
 
 ---
 
-- block:
-    - when: focalboard_enabled | bool
+- name: Perform Focalboard installation tasks
+  block:
+    - name: Validate Focalboard configuration
+      when: focalboard_enabled | bool
       ansible.builtin.include_tasks: "{{ role_path }}/tasks/validate_config.yml"
 
-    - when: focalboard_enabled | bool
+    - name: Install Focalboard
+      when: focalboard_enabled | bool
       ansible.builtin.include_tasks: "{{ role_path }}/tasks/install.yml"
   tags:
     - setup-all
@@ -16,8 +19,10 @@
     - install-all
     - install-focalboard
 
-- block:
-    - when: not focalboard_enabled | bool
+- name: Perform Focalboard uninstallation tasks
+  block:
+    - name: Uninstall Focalboard
+      when: not focalboard_enabled | bool
       ansible.builtin.include_tasks: "{{ role_path }}/tasks/uninstall.yml"
   tags:
     - setup-all
