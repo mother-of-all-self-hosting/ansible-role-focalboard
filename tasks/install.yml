@@ -27,7 +27,7 @@
     - env
     - labels
 
-- name: Ensure Focalboard configuration created
+- name: Ensure Focalboard configuration file installed
   ansible.builtin.copy:
     content: "{{ focalboard_configuration | to_nice_json }}"
     dest: "{{ focalboard_config_path }}/config.json"
