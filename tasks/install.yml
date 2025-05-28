@@ -3,12 +3,11 @@
 # SPDX-License-Identifier: AGPL-3.0-or-later
 
 ---
-
 - name: Ensure Focalboard paths exist
   ansible.builtin.file:
     path: "{{ item }}"
     state: directory
-    mode: 0750
+    mode: "0750"
     owner: "{{ focalboard_uid }}"
     group: "{{ focalboard_gid }}"
   with_items:
@@ -22,7 +21,7 @@
     dest: "{{ focalboard_base_path }}/{{ item }}"
     owner: "{{ focalboard_uid }}"
     group: "{{ focalboard_gid }}"
-    mode: 0640
+    mode: "0640"
   with_items:
     - env
     - labels
@@ -33,7 +32,7 @@
     dest: "{{ focalboard_config_path }}/config.json"
     owner: "{{ focalboard_uid }}"
     group: "{{ focalboard_gid }}"
-    mode: 0640
+    mode: "0640"
 
 - name: Ensure Focalboard image is pulled
   community.docker.docker_image:
@@ -57,4 +56,4 @@
   ansible.builtin.template:
     src: "{{ role_path }}/templates/systemd/focalboard.service.j2"
     dest: "{{ devture_systemd_docker_base_systemd_path }}/{{ focalboard_identifier }}.service"
-    mode: 0644
+    mode: "0644"
