@@ -24,23 +24,23 @@ ExecStartPre=-{{ devture_systemd_docker_base_host_command_sh }} -c '{{ devture_s
 ExecStartPre=-{{ devture_systemd_docker_base_host_command_sh }} -c '{{ devture_systemd_docker_base_host_command_docker }} rm {{ focalboard_identifier }} 2>/dev/null'
 
 ExecStartPre={{ devture_systemd_docker_base_host_command_docker }} create \
-			--rm \
-			--name={{ focalboard_identifier }} \
-			--log-driver=none \
-			--network={{ focalboard_container_network }} \
-			--user={{ focalboard_uid }}:{{ focalboard_gid }} \
-			--cap-drop=ALL \
-			--read-only \
-			--hostname={{ focalboard_hostname }} \
-			{% if focalboard_container_http_bind_port %}
-			-p {{ focalboard_container_http_bind_port }}:{{ focalboard_config_virtual_port }} \
-			{% endif %}
-			--env-file={{ focalboard_base_path }}/env \
-			--label-file={{ focalboard_base_path }}/labels \
-			--mount type=bind,src={{ focalboard_data_path }},dst=/data \
-			--mount type=bind,src={{ focalboard_config_path }}/config.json,dst=/opt/focalboard/config.json,ro \
-			--tmpfs=/tmp:rw,noexec,nosuid,size=512m \
-			{{ focalboard_container_image }}
+      --rm \
+      --name={{ focalboard_identifier }} \
+      --log-driver=none \
+      --network={{ focalboard_container_network }} \
+      --user={{ focalboard_uid }}:{{ focalboard_gid }} \
+      --cap-drop=ALL \
+      --read-only \
+      --hostname={{ focalboard_hostname }} \
+      {% if focalboard_container_http_bind_port %}
+      -p {{ focalboard_container_http_bind_port }}:{{ focalboard_config_virtual_port }} \
+      {% endif %}
+      --env-file={{ focalboard_base_path }}/env \
+      --label-file={{ focalboard_base_path }}/labels \
+      --mount type=bind,src={{ focalboard_data_path }},dst=/data \
+      --mount type=bind,src={{ focalboard_config_path }}/config.json,dst=/opt/focalboard/config.json,ro \
+      --tmpfs=/tmp:rw,noexec,nosuid,size=512m \
+      {{ focalboard_container_image }}
 
 {% for network in focalboard_container_additional_networks %}
 ExecStartPre={{ devture_systemd_docker_base_host_command_docker }} network connect {{ network }} {{ focalboard_identifier }}
