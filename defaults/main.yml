@@ -69,6 +69,12 @@ focalboard_container_labels_traefik_entrypoints: web-secure
 focalboard_container_labels_traefik_tls: "{{ focalboard_container_labels_traefik_entrypoints != 'web' }}"
 focalboard_container_labels_traefik_tls_certResolver: default  # noqa var-naming
 
+# Controls which additional headers to attach to all HTTP requests.
+# To add your own custom request headers, use `focalboard_container_labels_traefik_additional_response_headers_custom`
+focalboard_container_labels_traefik_additional_request_headers: "{{ focalboard_container_labels_traefik_additional_request_headers_auto | combine(focalboard_container_labels_traefik_additional_request_headers_custom) }}"
+focalboard_container_labels_traefik_additional_request_headers_auto: {}
+focalboard_container_labels_traefik_additional_request_headers_custom: {}
+
 # Controls which additional headers to attach to all HTTP responses.
 # To add your own headers, use `focalboard_container_labels_traefik_additional_response_headers_custom`
 focalboard_container_labels_traefik_additional_response_headers: "{{ focalboard_container_labels_traefik_additional_response_headers_auto | combine(focalboard_container_labels_traefik_additional_response_headers_custom) }}"
