@@ -26,9 +26,9 @@ See the project's [documentation](https://focalboard.app/docs/) to learn what Fo
 
 ## Prerequisites
 
-To run a Focalboard instance it is necessary to prepare a [Postgres](https://www.postgresql.org) database server.
+To run a Focalboard instance it is necessary to prepare a database. You can use a [SQLite](https://www.sqlite.org/) or [Postgres](https://www.postgresql.org/) compatible database server. By default it is configured to use SQLite.
 
-If you are looking for an Ansible role for it, you can check out [this role (ansible-role-postgres)](https://github.com/mother-of-all-self-hosting/ansible-role-postgres) maintained by the [Mother-of-All-Self-Hosting (MASH)](https://github.com/mother-of-all-self-hosting) team.
+If you are looking for an Ansible role for Postgres, you can check out [this role (ansible-role-postgres)](https://github.com/mother-of-all-self-hosting/ansible-role-postgres) maintained by the [Mother-of-All-Self-Hosting (MASH)](https://github.com/mother-of-all-self-hosting) team.
 
 ## Adjusting the playbook configuration
 
