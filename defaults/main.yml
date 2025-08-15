@@ -154,7 +154,10 @@ focalboard_systemd_required_services_list_custom: []
 # List of systemd services that the Focalboard systemd service wants
 focalboard_systemd_wanted_services_list: []
 
+# Specify database to use
+# Valid values: sqlite, postgres
 focalboard_database_type: sqlite
+
 focalboard_database_hostname: ''
 focalboard_database_port: 5432
 focalboard_database_name: focalboard
