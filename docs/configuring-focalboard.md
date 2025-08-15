@@ -10,6 +10,7 @@ SPDX-FileCopyrightText: 2022 Julian Foad
 SPDX-FileCopyrightText: 2022 Warren Bailey
 SPDX-FileCopyrightText: 2023 Antonis Christofides
 SPDX-FileCopyrightText: 2023 Felix Stupp
+SPDX-FileCopyrightText: 2023 Julian-Samuel Gebühr
 SPDX-FileCopyrightText: 2023 Pierre 'McFly' Marty
 SPDX-FileCopyrightText: 2024 - 2025 Suguru Hirahara
 
@@ -18,11 +19,11 @@ SPDX-License-Identifier: AGPL-3.0-or-later
 
 # Setting up Focalboard
 
-This is an [Ansible](https://www.ansible.com/) role which installs [Focalboard](https://focalboard.app/) to run as a [Docker](https://www.docker.com/) container wrapped in a systemd service.
+This is an [Ansible](https://www.ansible.com/) role which installs [Focalboard](https://www.focalboard.com/) to run as a [Docker](https://www.docker.com/) container wrapped in a systemd service.
 
-Focalboard is a self-hosted, high performance one-way mailing list and newsletter manager.
+Focalboard is an open source, self-hosted alternative to [Trello](https://trello.com/), [Notion](https://www.notion.so/), and [Asana](https://asana.com/).
 
-See the project's [documentation](https://focalboard.app/docs/) to learn what Focalboard does and why it might be useful to you.
+See the project's [documentation](https://github.com/mattermost-community/focalboard/blob/main/README.md) to learn what Focalboard does and why it might be useful to you.
 
 ## Prerequisites
 
@@ -69,6 +70,7 @@ After adjusting the hostname, make sure to adjust your DNS records to point the 
 To have the Focalboard instance connect to your Postgres server, add the following configuration to your `vars.yml` file.
 
 ```yaml
+focalboard_database_type: postgres
 focalboard_database_hostname: YOUR_POSTGRES_SERVER_HOSTNAME_HERE
 focalboard_database_port: 5432
 focalboard_database_name: YOUR_POSTGRES_SERVER_DATABASE_NAME_HERE
@@ -86,8 +88,6 @@ Take a look at:
 
 - [`defaults/main.yml`](../defaults/main.yml) for some variables that you can customize via your `vars.yml` file. You can override settings (even those that don't have dedicated playbook variables) using the `focalboard_environment_variables_additional_variables` variable
 
-See its [environment variables](https://focalboard.app/docs/configuration/#environment-variables) for a complete list of Focalboard's config options that you could put in `focalboard_environment_variables_additional_variables`.
-
 ## Installing
 
 After configuring the playbook, run the installation command of your playbook as below:
@@ -100,7 +100,7 @@ If you use the MASH playbook, the shortcut commands with the [`just` program](ht
 
 ## Usage
 
-After running the command for installation, Focalboard becomes available at the specified hostname like `https://example.com`.
+After running the command for installation, the Focalboard instance becomes available at the URL specified with `focalboard_hostname` and `focalboard_path_prefix`. With the configuration above, the service is hosted at `https://example.com`.
 
 ## Troubleshooting
 
