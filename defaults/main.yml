@@ -152,7 +152,10 @@ focalboard_systemd_required_services_list_auto: []
 focalboard_systemd_required_services_list_custom: []
 
 # List of systemd services that the Focalboard systemd service wants
-focalboard_systemd_wanted_services_list: []
+focalboard_systemd_wanted_services_list: "{{ focalboard_systemd_wanted_services_list_default + focalboard_systemd_wanted_services_list_auto + focalboard_systemd_wanted_services_list_custom }}"
+focalboard_systemd_wanted_services_list_default: []
+focalboard_systemd_wanted_services_list_auto: []
+focalboard_systemd_wanted_services_list_custom: []
 
 # Specify database to use
 # Valid values: sqlite, postgres
