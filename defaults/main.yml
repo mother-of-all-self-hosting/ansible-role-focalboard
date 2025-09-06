@@ -158,7 +158,7 @@ focalboard_systemd_wanted_services_list_auto: []
 focalboard_systemd_wanted_services_list_custom: []
 
 # Specify database to use
-# Valid values: sqlite, postgres
+# Valid values: postgres, sqlite
 focalboard_database_type: sqlite
 
 focalboard_database_hostname: ''
