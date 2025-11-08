@@ -20,11 +20,11 @@ focalboard_config_path: "{{ focalboard_base_path }}/config"
 # renovate: datasource=docker depName=mattermost/focalboard versioning=semver
 focalboard_version: 7.11.4
 
-focalboard_uid: ''
-focalboard_gid: ''
+focalboard_uid: ""
+focalboard_gid: ""
 
 # The fully-qualified name of your Focalboard server (e.g. `focalboard.example.com`)
-focalboard_hostname: ''
+focalboard_hostname: ""
 
 focalboard_scheme: https
 
@@ -42,7 +42,7 @@ focalboard_container_image_force_pull: "{{ focalboard_container_image.endswith('
 # Controls whether the container exposes its HTTP port (tcp/80 in the container).
 #
 # Takes an "<ip>:<port>" or "<port>" value (e.g. "127.0.0.1:8080"), or empty string to not expose.
-focalboard_container_http_bind_port: ''
+focalboard_container_http_bind_port: ""
 
 # The base container network. It will be auto-created by this role if it doesn't exist already.
 focalboard_container_network: "{{ focalboard_identifier }}"
@@ -96,7 +96,7 @@ focalboard_container_labels_traefik_additional_response_headers_custom: {}
 # focalboard_container_labels_additional_labels: |
 #   my.label=1
 #   another.label="here"
-focalboard_container_labels_additional_labels: ''
+focalboard_container_labels_additional_labels: ""
 
 # Specifies the value of the `X-XSS-Protection` header
 # Stops pages from loading when they detect reflected cross-site scripting (XSS) attacks.
@@ -161,11 +161,11 @@ focalboard_systemd_wanted_services_list_custom: []
 # Valid values: postgres, sqlite
 focalboard_database_type: sqlite
 
-focalboard_database_hostname: ''
+focalboard_database_hostname: ""
 focalboard_database_port: 5432
 focalboard_database_name: focalboard
 focalboard_database_username: focalboard
-focalboard_database_password: ''
+focalboard_database_password: ""
 # Use this to set the sslmode parameter of the SSL connection
 # By default, we expect a local container (without SSL), so attempting SSL connections is not necessary.
 focalboard_database_sslmode: disable
@@ -253,4 +253,4 @@ focalboard_configuration: "{{ focalboard_configuration_default | combine(focalbo
 # focalboard_environment_variables_additional_variables: |
 #   VAR=1
 #   ANOTHER=value
-focalboard_environment_variables_additional_variables: ''
+focalboard_environment_variables_additional_variables: ""
