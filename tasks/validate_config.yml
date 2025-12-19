@@ -27,6 +27,7 @@
     - focalboard_gid
     - focalboard_hostname
     - focalboard_path_prefix
+    - focalboard_container_network
 
 - name: Fail if Focalboard database type invalid
   ansible.builtin.fail:
