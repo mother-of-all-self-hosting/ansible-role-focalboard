@@ -23,10 +23,10 @@
       You need to define a required configuration setting (`{{ item }}`).
   when: "lookup('vars', item, default='') | string | length == 0"
   with_items:
-    - focalboard_hostname
-    - focalboard_path_prefix
     - focalboard_uid
     - focalboard_gid
+    - focalboard_hostname
+    - focalboard_path_prefix
 
 - name: Fail if Focalboard database type invalid
   ansible.builtin.fail:
