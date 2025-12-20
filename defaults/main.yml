@@ -96,7 +96,9 @@ focalboard_container_labels_traefik_additional_response_headers_custom: {}
 # focalboard_container_labels_additional_labels: |
 #   my.label=1
 #   another.label="here"
-focalboard_container_labels_additional_labels: ""
+focalboard_container_labels_additional_labels: "{{ focalboard_container_labels_additional_labels_auto | combine(focalboard_container_labels_additional_labels_custom) }}"
+focalboard_container_labels_additional_labels_auto: {}
+focalboard_container_labels_additional_labels_custom: {}
 
 # Specifies the value of the `X-XSS-Protection` header
 # Stops pages from loading when they detect reflected cross-site scripting (XSS) attacks.
