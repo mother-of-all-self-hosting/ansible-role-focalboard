@@ -23,7 +23,7 @@ focalboard_version: 7.11.4
 focalboard_uid: ""
 focalboard_gid: ""
 
-# The fully-qualified name of your Focalboard server (e.g. `focalboard.example.com`)
+# The hostname at which Focalboard is served.
 focalboard_hostname: ""
 
 focalboard_scheme: https
