@@ -19,9 +19,9 @@
   ansible.builtin.template:
     src: "{{ role_path }}/templates/{{ item }}.j2"
     dest: "{{ focalboard_base_path }}/{{ item }}"
+    mode: "0640"
     owner: "{{ focalboard_uid }}"
     group: "{{ focalboard_gid }}"
-    mode: "0640"
   with_items:
     - env
     - labels
@@ -30,9 +30,9 @@
   ansible.builtin.copy:
     content: "{{ focalboard_configuration | to_nice_json }}"
     dest: "{{ focalboard_config_path }}/config.json"
+    mode: "0640"
     owner: "{{ focalboard_uid }}"
     group: "{{ focalboard_gid }}"
-    mode: "0640"
 
 - name: Ensure Focalboard container image is pulled via community.docker.docker_image
   when: devture_systemd_docker_base_container_image_pull_method == 'ansible-module'
