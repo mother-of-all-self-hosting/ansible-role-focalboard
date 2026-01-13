@@ -23,10 +23,11 @@ focalboard_version: 7.11.4
 focalboard_uid: ""
 focalboard_gid: ""
 
+# The scheme used for serving Focalboard.
+focalboard_scheme: https
+
 # The hostname at which Focalboard is served.
 focalboard_hostname: ""
-
-focalboard_scheme: https
 
 # The path at which Focalboard is served.
 # This value must either be `/` or not end with a slash (e.g. `/focalboard`).
@@ -41,7 +42,7 @@ focalboard_container_image_force_pull: "{{ focalboard_container_image.endswith('
 
 # Controls whether the container exposes its HTTP port (tcp/80 in the container).
 #
-# Takes an "<ip>:<port>" or "<port>" value (e.g. "127.0.0.1:8080"), or empty string to not expose.
+# Takes an "<ip>:<port>" or "<port>" value (e.g. "127.0.0.1:2586"), or empty string to not expose.
 focalboard_container_http_bind_port: ""
 
 # The base container network. It will be auto-created by this role if it doesn't exist already.
