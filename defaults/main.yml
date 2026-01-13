@@ -57,7 +57,7 @@ focalboard_container_additional_networks_custom: []
 # focalboard_container_labels_traefik_enabled controls whether labels to assist a Traefik reverse-proxy will be attached to the container.
 # See `../templates/labels.j2` for details.
 #
-# To inject your own other container labels, see `focalboard_container_labels_additional_labels`.
+# To inject your own other container labels, see `focalboard_container_labels_additional_labels_custom`.
 focalboard_container_labels_traefik_enabled: true
 focalboard_container_labels_traefik_docker_network: "{{ focalboard_container_network }}"
 focalboard_container_labels_traefik_hostname: "{{ focalboard_hostname }}"
