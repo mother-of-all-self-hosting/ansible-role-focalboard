@@ -39,7 +39,7 @@ ExecStartPre={{ devture_systemd_docker_base_host_command_docker }} create \
       --label-file={{ focalboard_base_path }}/labels \
       --mount type=bind,src={{ focalboard_data_path }},dst=/data \
       --mount type=bind,src={{ focalboard_config_path }}/config.json,dst=/opt/focalboard/config.json,ro \
-      --tmpfs=/tmp:rw,noexec,nosuid,size=512m \
+      --tmpfs=/tmp:rw,noexec,nosuid,size={{ focalboard_container_tmpfs_tmp_size }} \
       {% for arg in focalboard_container_extra_arguments %}
       {{ arg }} \
       {% endfor %}

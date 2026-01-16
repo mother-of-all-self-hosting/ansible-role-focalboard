@@ -102,6 +102,9 @@ focalboard_container_labels_additional_labels: "{{ focalboard_container_labels_a
 focalboard_container_labels_additional_labels_auto: []
 focalboard_container_labels_additional_labels_custom: []
 
+# Specify the size of the container's tmpfs volume
+focalboard_container_tmpfs_tmp_size: 512m
+
 # A list of extra arguments to pass to the container (`docker create` command)
 focalboard_container_extra_arguments: "{{ focalboard_container_extra_arguments_auto + focalboard_container_extra_arguments_custom }}"
 focalboard_container_extra_arguments_auto: []
