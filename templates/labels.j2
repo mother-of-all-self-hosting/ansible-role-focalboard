@@ -52,7 +52,7 @@ traefik.http.routers.{{ focalboard_identifier }}.tls={{ focalboard_container_lab
 traefik.http.routers.{{ focalboard_identifier }}.tls.certResolver={{ focalboard_container_labels_traefik_tls_certResolver }}
 {% endif %}
 
-traefik.http.services.{{ focalboard_identifier }}.loadbalancer.server.port={{ focalboard_config_virtual_port }}
+traefik.http.services.{{ focalboard_identifier }}.loadbalancer.server.port={{ focalboard_container_http_port }}
 {% endif %}
 
 {% for arg in focalboard_container_labels_additional_labels %}

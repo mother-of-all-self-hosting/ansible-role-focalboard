@@ -33,7 +33,7 @@ ExecStartPre={{ devture_systemd_docker_base_host_command_docker }} create \
       --read-only \
       --hostname={{ focalboard_hostname }} \
       {% if focalboard_container_http_bind_port %}
-      -p {{ focalboard_container_http_bind_port }}:{{ focalboard_config_virtual_port }} \
+      -p {{ focalboard_container_http_bind_port }}:{{ focalboard_container_http_port }} \
       {% endif %}
       --env-file={{ focalboard_base_path }}/env \
       --label-file={{ focalboard_base_path }}/labels \

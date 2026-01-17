@@ -10,6 +10,7 @@
       Please change your configuration to rename the variable (`{{ item.old }}` -> `{{ item.new }}`).
   when: "lookup('ansible.builtin.varnames', ('^' + item.old + '$'), wantlist=True) | length > 0"
   with_items:
+    - { "old": "focalboard_config_virtual_port", "new": "focalboard_container_http_port" }
     - { "old": "focalboard_systemd_required_systemd_services_list", "new": "focalboard_systemd_required_services_list" }
     - { "old": "focalboard_systemd_required_systemd_services_list_default", "new": "focalboard_systemd_required_services_list_default" }
     - { "old": "focalboard_systemd_required_systemd_services_list_auto", "new": "focalboard_systemd_required_services_list_auto" }

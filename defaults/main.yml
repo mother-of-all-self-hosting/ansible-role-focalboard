@@ -48,6 +48,9 @@ focalboard_container_network: "{{ focalboard_identifier }}"
 # Takes an "<ip>:<port>" or "<port>" value (e.g. "127.0.0.1:2586"), or empty string to not expose.
 focalboard_container_http_bind_port: ""
 
+# The port number in the container
+focalboard_container_http_port: 8080
+
 # A list of additional container networks that the container would be connected to.
 # The role does not create these networks, so make sure they already exist.
 # Use this to expose this container to another reverse proxy, which runs in a different container network.
@@ -188,15 +191,11 @@ focalboard_database_sslmode: disable
 # focalboard_config_virtual_host controls the VIRTUAL_HOST environment variable
 focalboard_config_virtual_host: "{{ focalboard_hostname }}"
 
-# focalboard_config_virtual_port controls the VIRTUAL_PORT environment variable,
-# which controls Focalboard's HTTP port in the container
-focalboard_config_virtual_port: 8080
-
 # focalboard_config_serverRoot controls the serverRoot configuration parameter
 focalboard_config_serverRoot: "{{ focalboard_scheme }}://{{ focalboard_hostname }}{% if focalboard_path_prefix != '/' %}{{ focalboard_path_prefix }}{% endif %}"  # noqa var-naming
 
 # focalboard_config_port controls the port configuration parameter
-focalboard_config_port: "{{ focalboard_config_virtual_port }}"
+focalboard_config_port: "{{ focalboard_container_http_port }}"
 
 # focalboard_config_dbtype controls the dbtype configuration parameter
 focalboard_config_dbtype: |-
