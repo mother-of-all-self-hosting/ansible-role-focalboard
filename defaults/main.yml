@@ -1,9 +1,9 @@
 # SPDX-FileCopyrightText: 2023 westerguard
-# SPDX-FileCopyrightText: 2023 - 2024 Nikita Chernyi
-# SPDX-FileCopyrightText: 2023 - 2025 Slavi Pantaleev
+# SPDX-FileCopyrightText: 2023, 2024 Nikita Chernyi
+# SPDX-FileCopyrightText: 2023-2025 Slavi Pantaleev
 # SPDX-FileCopyrightText: 2024 Sergio Durigan Junior
 # SPDX-FileCopyrightText: 2025 MASH project contributors
-# SPDX-FileCopyrightText: 2025 Suguru Hirahara
+# SPDX-FileCopyrightText: 2025, 2026 Suguru Hirahara
 #
 # SPDX-License-Identifier: AGPL-3.0-or-later
 
@@ -206,18 +206,20 @@ focalboard_container_cleanup_command: |
   echo "Failed to remove stale container {{ focalboard_identifier }} after {{ focalboard_container_cleanup_timeout_seconds }} attempts" >&2;
   exit 1
 
-# Specify database to use
+# Specify a database driver to use
 # Valid values: postgres, sqlite
 focalboard_database_type: sqlite
 
+# Specify database configuration
 focalboard_database_hostname: ""
 focalboard_database_port: 5432
-focalboard_database_name: focalboard
 focalboard_database_username: focalboard
 focalboard_database_password: ""
-# Use this to set the sslmode parameter of the SSL connection
+# Specify SSL mode for Postgres database server
 # By default, we expect a local container (without SSL), so attempting SSL connections is not necessary.
+# Valid values: see https://www.postgresql.org/docs/11/libpq-ssl.html#LIBPQ-SSL-SSLMODE-STATEMENTS
 focalboard_database_sslmode: disable
+focalboard_database_name: focalboard
 
 # Configuration parameters seen below are documented here:
 # https://github.com/mattermost/focalboard/blob/main/website/site/content/guide/admin/_index.md
