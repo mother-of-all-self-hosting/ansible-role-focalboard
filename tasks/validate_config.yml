@@ -43,7 +43,7 @@
       You need to define a required configuration setting (`{{ item }}`) when `focalboard_database_type` is `postgres`
   when: "focalboard_database_type == 'postgres' and lookup('vars', item, default='') | string | length == 0"
   with_items:
-    - focalboard_database_username
+    - focalboard_database_hostname
     - focalboard_database_password
 
 - name: Run if Traefik is enabled
