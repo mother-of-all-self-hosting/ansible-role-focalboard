@@ -65,7 +65,7 @@ After adjusting the hostname, make sure to adjust your DNS records to point the 
 
 **Note**: hosting Focalboard under a subpath does not seem to be possible due to Focalboard's technical limitations.
 
-### Set variables for connecting to a Postgres database server
+### Set variables for the database server
 
 To have the Focalboard instance connect to your Postgres server, add the following configuration to your `vars.yml` file.
 
