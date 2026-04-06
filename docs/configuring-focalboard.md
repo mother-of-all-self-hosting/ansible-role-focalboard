@@ -78,7 +78,7 @@ focalboard_database_username: YOUR_POSTGRES_SERVER_USERNAME_HERE
 focalboard_database_password: YOUR_POSTGRES_SERVER_PASSWORD_HERE
 ```
 
-Make sure to replace values for variables with yours.
+Make sure to replace the placeholders with your own values.
 
 ### Extending the configuration
 
