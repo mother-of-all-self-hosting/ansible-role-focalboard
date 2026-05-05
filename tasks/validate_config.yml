@@ -18,6 +18,7 @@
     - { "old": "focalboard_systemd_required_systemd_services_list_custom", "new": "focalboard_systemd_required_services_list_custom" }
     - { "old": "focalboard_container_additional_environment_variables", "new": "focalboard_environment_variables_additional_variables" }
     - { "old": "focalboard_http_header_content_permission_policy", "new": "focalboard_http_header_permissions_policy" }
+    - { "old": "focalboard_container_image_force_pull", "new": "<removed> (the new community.docker.docker_image_pull module handles this natively)" }
 
 - name: Fail if required Focalboard settings not defined
   ansible.builtin.fail:

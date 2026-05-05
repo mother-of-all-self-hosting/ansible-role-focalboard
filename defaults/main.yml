@@ -38,7 +38,6 @@ focalboard_container_image_tag: "{{ focalboard_version }}"
 focalboard_container_image_registry_prefix: "{{ focalboard_container_image_registry_prefix_upstream }}"
 focalboard_container_image_registry_prefix_upstream: "{{ focalboard_container_image_registry_prefix_upstream_default }}"
 focalboard_container_image_registry_prefix_upstream_default: docker.io/
-focalboard_container_image_force_pull: "{{ focalboard_container_image.endswith(':latest') }}"
 
 # The base container network. It will be auto-created by this role if it doesn't exist already.
 focalboard_container_network: "{{ focalboard_identifier }}"
