@@ -74,6 +74,9 @@ focalboard_container_labels_traefik_priority: 0
 focalboard_container_labels_traefik_entrypoints: web-secure
 focalboard_container_labels_traefik_tls: "{{ focalboard_container_labels_traefik_entrypoints != 'web' }}"
 focalboard_container_labels_traefik_tls_certResolver: default  # noqa var-naming
+focalboard_container_labels_traefik_middleware_basic_auth_enabled: false
+# See: https://doc.traefik.io/traefik/reference/routing-configuration/http/middlewares/basicauth/
+focalboard_container_labels_traefik_middleware_basic_auth_users: ""
 
 # Controls which additional headers to attach to all HTTP requests.
 # To add your own custom request headers, use `focalboard_container_labels_traefik_additional_request_headers_custom`
