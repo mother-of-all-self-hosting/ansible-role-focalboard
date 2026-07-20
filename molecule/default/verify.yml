@@ -1,0 +1,53 @@
+# SPDX-FileCopyrightText: 2026 Suguru Hirahara
+# SPDX-FileCopyrightText: 2026 spatterlight
+#
+# SPDX-License-Identifier: AGPL-3.0-or-later
+
+---
+- name: Verify Focalboard systemd service
+  hosts: all
+  become: true
+  gather_facts: false
+  tasks:
+    - name: Wait for Focalboard service to become active (up to 180s)
+      ansible.builtin.systemd:
+        name: focalboard.service
+      register: focalboard_service
+      until: focalboard_service.status.ActiveState == 'active'
+      retries: 36
+      delay: 5
+
+    - name: Assert Focalboard service is active
+      ansible.builtin.assert:
+        that: focalboard_service.status.ActiveState == 'active'
+        fail_msg: "focalboard.service not active ({{ focalboard_service.status.ActiveState }})"
+        success_msg: "focalboard.service is active"
+
+    - name: Retrieve Focalboard service log for debugging
+      when: focalboard_debug_service_enabled | bool
+      ansible.builtin.command:
+        cmd: journalctl -xeu focalboard.service
+      changed_when: false
+
+    - name: Wait for Focalboard HTTP endpoint to respond (up to 10m)
+      ansible.builtin.uri:
+        url: "http://localhost:9090/"
+        method: GET
+        status_code: [200, 302]
+        follow_redirects: none
+      register: focalboard_endpoint
+      until: focalboard_endpoint.status in [200, 302]
+      retries: 120
+      delay: 5
+
+    - name: Assert Focalboard HTTP endpoint responds
+      ansible.builtin.assert:
+        that: focalboard_endpoint.status in [200, 302]
+        fail_msg: "Focalboard did not respond as expected ({{ focalboard_endpoint.status | default('no response') }})"
+        success_msg: "Focalboard responded with {{ focalboard_endpoint.status }}"
+
+    - name: Show Focalboard systemd service status summary
+      ansible.builtin.debug:
+        msg:
+          - "Focalboard systemd: {{ focalboard_service.status.ActiveState }}"
+          - "Focalboard HTTP: {{ focalboard_endpoint.status }}"
