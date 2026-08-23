@@ -38,9 +38,9 @@ provisioner:
         focalboard_hostname: localhost
         focalboard_container_labels_traefik_enabled: false
         focalboard_container_http_host_bind_port: 9090
-        focalboard_database_type: postgres
 
         # Variables required for Focalboard to connect to the Postgres database
+        focalboard_database_type: postgres
         focalboard_database_hostname: "{{ postgres_connection_hostname }}"
         focalboard_database_port: "{{ postgres_connection_port }}"
         focalboard_database_username: my_database_username
