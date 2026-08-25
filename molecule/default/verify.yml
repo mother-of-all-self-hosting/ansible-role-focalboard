@@ -53,7 +53,7 @@
     # service to the image tag the role pins.
     - name: Inspect the running Focalboard container
       ansible.builtin.command:
-        cmd: docker inspect focalboard
+        cmd: docker container inspect focalboard
       register: focalboard_inspect
       changed_when: false
 
