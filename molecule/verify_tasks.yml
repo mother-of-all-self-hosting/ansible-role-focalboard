@@ -42,17 +42,15 @@
   register: focalboard_inspect
   changed_when: false
 
-- name: Assert the running container is the Focalboard version this role installs
-  vars:
-    focalboard_container: "{{ focalboard_inspect.stdout | from_json | first }}"
+- name: Assert the running Focalboard is the version this role installs
   ansible.builtin.assert:
     that:
       - focalboard_container.State.Running
       - focalboard_container.Config.Image.split(':') | last == focalboard_defaults.focalboard_version
-    fail_msg: >-
-      Expected a running container on Focalboard {{ focalboard_defaults.focalboard_version }},
-      got {{ focalboard_container.Config.Image }} in state {{ focalboard_container.State.Status }}
-    success_msg: "The running container is {{ focalboard_container.Config.Image }}"
+    fail_msg: "Focalboard reports {{ focalboard_container.Config.Image | default('none') }}, expected {{ focalboard_defaults.focalboard_version }}"
+    success_msg: "Focalboard reports {{ focalboard_container.Config.Image }}"
+  vars:
+    focalboard_container: "{{ focalboard_inspect.stdout | from_json | first }}"
 
 # The image ships a config.json of its own that listens on port 8000. The
 # role bind-mounts its own over it, telling Focalboard to listen on 8080,
