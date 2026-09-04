@@ -1,0 +1,188 @@
+# SPDX-FileCopyrightText: 2026 Slavi Pantaleev
+# SPDX-FileCopyrightText: 2026 spatterlight
+# SPDX-FileCopyrightText: 2026 Suguru Hirahara
+#
+# SPDX-License-Identifier: AGPL-3.0-or-later
+
+---
+# The role is not included in this playbook, so its defaults are not in
+# scope. Reading defaults/main.yml directly ties the version assertion
+# below.
+- name: Load the role defaults
+  ansible.builtin.include_vars:
+    file: "{{ lookup('env', 'MOLECULE_PROJECT_DIRECTORY') }}/defaults/main.yml"
+    name: focalboard_defaults
+
+- name: Wait for Focalboard service to become active (up to 180s)
+  ansible.builtin.systemd:
+    name: focalboard.service
+  register: focalboard_service
+  until: focalboard_service.status.ActiveState == 'active'
+  retries: 36
+  delay: 5
+
+- name: Assert Focalboard service is active
+  ansible.builtin.assert:
+    that: focalboard_service.status.ActiveState == 'active'
+    fail_msg: "focalboard.service not active ({{ focalboard_service.status.ActiveState }})"
+    success_msg: "focalboard.service is active"
+
+- name: Retrieve Focalboard service log for debugging
+  when: focalboard_debug_service_enabled | bool
+  ansible.builtin.command:
+    cmd: journalctl -xeu focalboard.service
+  changed_when: false
+
+# A systemd unit reporting `active` only says the `docker start` in it has
+# not returned yet. Asking Docker what is actually running is what ties the
+# service to the image tag the role pins.
+- name: Inspect the running Focalboard container
+  ansible.builtin.command:
+    cmd: docker container inspect focalboard
+  register: focalboard_inspect
+  changed_when: false
+
+- name: Assert the running container is the Focalboard version this role installs
+  vars:
+    focalboard_container: "{{ focalboard_inspect.stdout | from_json | first }}"
+  ansible.builtin.assert:
+    that:
+      - focalboard_container.State.Running
+      - focalboard_container.Config.Image.split(':') | last == focalboard_defaults.focalboard_version
+    fail_msg: >-
+      Expected a running container on Focalboard {{ focalboard_defaults.focalboard_version }},
+      got {{ focalboard_container.Config.Image }} in state {{ focalboard_container.State.Status }}
+    success_msg: "The running container is {{ focalboard_container.Config.Image }}"
+
+# The image ships a config.json of its own that listens on port 8000. The
+# role bind-mounts its own over it, telling Focalboard to listen on 8080,
+# which is the port the container publishes to 9090 on the host. Getting an
+# answer here therefore already proves the role's config.json reached the
+# process - the image's own would be serving on a port nothing forwards to.
+- name: Wait for the Focalboard web interface to respond (up to 10m)
+  ansible.builtin.uri:
+    url: "{{ focalboard_verify_base_url }}/"
+    method: GET
+    status_code: [200, 301, 302, 401, 404, 500, 502, 503]
+    follow_redirects: none
+    return_content: true
+  register: focalboard_endpoint
+  until: focalboard_endpoint.status == 200
+  retries: 120
+  delay: 5
+
+- name: Assert the Focalboard web interface is served
+  ansible.builtin.assert:
+    that:
+      - focalboard_endpoint.status == 200
+      - "'Focalboard' in focalboard_endpoint.content"
+    fail_msg: "The Focalboard web interface did not render as expected (HTTP {{ focalboard_endpoint.status }})"
+    success_msg: "The Focalboard web interface is served"
+
+# `telemetry` is `true` in the config.json baked into the image and `false`
+# in the one this role renders. Focalboard reports the value it is actually
+# running with here, so this fails if the role's configuration file stops
+# reaching the process - which the port alone could not catch if the image
+# ever changed its own default.
+- name: Retrieve the Focalboard client configuration
+  ansible.builtin.uri:
+    url: "{{ focalboard_verify_base_url }}/api/v2/clientConfig"
+    method: GET
+    status_code: [200, 400, 401, 404, 500]
+    headers: "{{ focalboard_verify_headers }}"
+  register: focalboard_client_config
+
+- name: Assert the role's configuration reached the Focalboard process
+  ansible.builtin.assert:
+    that:
+      - focalboard_client_config.status == 200
+      - focalboard_client_config.json.telemetry == focalboard_defaults.focalboard_config_telemetry
+    fail_msg: >-
+      Focalboard reports telemetry={{ focalboard_client_config.json.telemetry | default('unknown') }},
+      expected {{ focalboard_defaults.focalboard_config_telemetry }} (HTTP {{ focalboard_client_config.status }})
+    success_msg: "Focalboard runs with the role's configuration (telemetry={{ focalboard_client_config.json.telemetry }})"
+
+# Focalboard lets the very first account register without a signup token.
+# Every later attempt is refused with a 401, which is the expected outcome
+# when this play is run a second time against the same instance.
+- name: Register the first Focalboard user
+  ansible.builtin.uri:
+    url: "{{ focalboard_verify_base_url }}/api/v2/register"
+    method: POST
+    status_code: [200, 400, 401, 404, 500]
+    headers: "{{ focalboard_verify_headers }}"
+    body_format: json
+    body:
+      username: "{{ focalboard_verify_username }}"
+      email: "{{ focalboard_verify_username }}@example.com"
+      password: "{{ focalboard_verify_password }}"
+  register: focalboard_register
+
+- name: Assert Focalboard accepted or already knows the user
+  ansible.builtin.assert:
+    that: focalboard_register.status in [200, 401]
+    fail_msg: "Registering the first Focalboard user failed with HTTP {{ focalboard_register.status }}"
+    success_msg: "Focalboard registration answered with {{ focalboard_register.status }}"
+
+- name: Log in to Focalboard
+  ansible.builtin.uri:
+    url: "{{ focalboard_verify_base_url }}/api/v2/login"
+    method: POST
+    status_code: [200, 400, 401, 404, 500]
+    headers: "{{ focalboard_verify_headers }}"
+    body_format: json
+    body:
+      type: normal
+      username: "{{ focalboard_verify_username }}"
+      password: "{{ focalboard_verify_password }}"
+  register: focalboard_login
+
+# A session is written to the database to answer this, so a login that
+# comes back with a usable token already exercises the data store.
+- name: Assert Focalboard issued a session token
+  ansible.builtin.assert:
+    that:
+      - focalboard_login.status == 200
+      - focalboard_login.json.token | default('') | length > 0
+    fail_msg: "Logging in to Focalboard failed with HTTP {{ focalboard_login.status }}"
+    success_msg: "Focalboard issued a session token"
+
+# Creating a board and reading it back is the smallest piece of work that
+# Focalboard exists to do, and it touches the database in both directions.
+- name: Create a board in Focalboard
+  ansible.builtin.uri:
+    url: "{{ focalboard_verify_base_url }}/api/v2/boards"
+    method: POST
+    status_code: [200, 400, 401, 404, 500]
+    headers: "{{ focalboard_verify_headers | combine({'Authorization': 'Bearer ' + focalboard_login.json.token}) }}"
+    body_format: json
+    body:
+      teamId: "0"
+      type: O
+      title: Molecule probe board
+  register: focalboard_board_create
+
+- name: Assert Focalboard created the board
+  ansible.builtin.assert:
+    that:
+      - focalboard_board_create.status == 200
+      - focalboard_board_create.json.id | default('') | length > 0
+    fail_msg: "Creating a board failed with HTTP {{ focalboard_board_create.status }}"
+    success_msg: "Focalboard created board {{ focalboard_board_create.json.id | default('?') }}"
+
+- name: Read the board back from Focalboard
+  ansible.builtin.uri:
+    url: "{{ focalboard_verify_base_url }}/api/v2/boards/{{ focalboard_board_create.json.id }}"
+    method: GET
+    status_code: [200, 400, 401, 404, 500]
+    headers: "{{ focalboard_verify_headers | combine({'Authorization': 'Bearer ' + focalboard_login.json.token}) }}"
+  register: focalboard_board_read
+
+- name: Assert the board Focalboard returns is the one that was created
+  ansible.builtin.assert:
+    that:
+      - focalboard_board_read.status == 200
+      - focalboard_board_read.json.id == focalboard_board_create.json.id
+      - focalboard_board_read.json.title == 'Molecule probe board'
+    fail_msg: "Reading the board back failed with HTTP {{ focalboard_board_read.status }}"
+    success_msg: "The board was stored and read back as {{ focalboard_board_read.json.title }}"
