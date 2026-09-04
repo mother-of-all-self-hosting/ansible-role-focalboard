@@ -221,7 +221,7 @@
         fail_msg: "No SQLite database at /focalboard/data/focalboard.db"
         success_msg: "The SQLite database is at /focalboard/data/focalboard.db ({{ focalboard_sqlite_database.stat.size | default(0) }} bytes)"
 
-    - name: Show Focalboard verification summary
+    - name: Show the Focalboard verification summary
       vars:
         focalboard_container: "{{ focalboard_inspect.stdout | from_json | first }}"
       ansible.builtin.debug:

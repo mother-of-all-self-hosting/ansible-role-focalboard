@@ -262,15 +262,15 @@
         fail_msg: "Focalboard created a SQLite database at /focalboard/data/focalboard.db despite being configured for Postgres"
         success_msg: "Focalboard created no SQLite database, as expected for a Postgres-backed instance"
 
-    - name: Show Focalboard verification summary
+    - name: Show the Focalboard verification summary
       vars:
         focalboard_container: "{{ focalboard_inspect.stdout | from_json | first }}"
       ansible.builtin.debug:
         msg:
-          - "Postgres systemd: {{ focalboard_postgres_service.status.ActiveState }}"
           - "Focalboard systemd: {{ focalboard_service.status.ActiveState }}"
           - "Focalboard image: {{ focalboard_container.Config.Image }}"
           - "Focalboard web interface: {{ focalboard_endpoint.status }}"
           - "Focalboard telemetry: {{ focalboard_client_config.json.telemetry }}"
           - "Focalboard board: {{ focalboard_board_read.json.id }} ({{ focalboard_board_read.json.title }})"
           - "Focalboard board rows in Postgres: {{ focalboard_database_records.stdout | trim }}"
+          - "Postgres systemd: {{ focalboard_postgres_service.status.ActiveState }}"
