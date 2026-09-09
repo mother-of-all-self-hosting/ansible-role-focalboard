@@ -21,6 +21,8 @@
       X-Requested-With: XMLHttpRequest
 
   tasks:
+    - name: Verify that Focalboard works
+      block:
     - name: Wait for the Postgres systemd service to become active (up to 180s)
       ansible.builtin.systemd_service:
         name: postgres.service
@@ -103,3 +105,19 @@
           - "Focalboard board: {{ focalboard_board_read.json.id }} ({{ focalboard_board_read.json.title }})"
           - "Focalboard board rows in Postgres: {{ focalboard_database_records.stdout | trim }}"
           - "Postgres systemd: {{ focalboard_postgres_service.status.ActiveState }}"
+
+      rescue:
+        # Whatever went wrong, the reason is almost always in the systemd service log.
+        - name: Retrieve the Focalboard systemd service log
+          ansible.builtin.command:
+            cmd: journalctl --no-pager --output=cat --unit=focalboard.service
+          register: actual_service_log
+          changed_when: false
+
+        - name: Show the Focalboard systemd service log
+          ansible.builtin.debug:
+            var: actual_service_log.stdout_lines
+
+        - name: Fail because verification did not pass
+          ansible.builtin.fail:
+            msg: "Focalboard verification failed. The systemd service log is printed above."

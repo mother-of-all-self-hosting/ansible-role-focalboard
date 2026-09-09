@@ -21,6 +21,8 @@
       X-Requested-With: XMLHttpRequest
 
   tasks:
+    - name: Verify that Focalboard works
+      block:
     - name: Run the checks shared by all Focalboard scenarios
       ansible.builtin.include_tasks:
         file: "{{ lookup('ansible.builtin.env', 'MOLECULE_PROJECT_DIRECTORY') }}/molecule/verify_tasks.yml"
@@ -55,3 +57,19 @@
           - "Focalboard telemetry: {{ focalboard_client_config.json.telemetry }}"
           - "Focalboard board: {{ focalboard_board_read.json.id }} ({{ focalboard_board_read.json.title }})"
           - "Focalboard SQLite database: {{ focalboard_sqlite_database.stat.size }} bytes"
+
+      rescue:
+        # Whatever went wrong, the reason is almost always in the systemd service log.
+        - name: Retrieve the Focalboard systemd service log
+          ansible.builtin.command:
+            cmd: journalctl --no-pager --output=cat --unit=focalboard.service
+          register: actual_service_log
+          changed_when: false
+
+        - name: Show the Focalboard systemd service log
+          ansible.builtin.debug:
+            var: actual_service_log.stdout_lines
+
+        - name: Fail because verification did not pass
+          ansible.builtin.fail:
+            msg: "Focalboard verification failed. The systemd service log is printed above."
