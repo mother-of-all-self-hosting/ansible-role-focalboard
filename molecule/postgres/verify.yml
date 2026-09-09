@@ -23,88 +23,88 @@
   tasks:
     - name: Verify that Focalboard works
       block:
-    - name: Wait for the Postgres systemd service to become active (up to 180s)
-      ansible.builtin.systemd_service:
-        name: postgres.service
-      register: focalboard_postgres_service
-      until: focalboard_postgres_service.status.ActiveState == 'active'
-      retries: 36
-      delay: 5
-      # So that giving up is reported by the assertion below rather than as a
-      # wall of systemd unit properties.
-      failed_when: false
+        - name: Wait for the Postgres systemd service to become active (up to 180s)
+          ansible.builtin.systemd_service:
+            name: postgres.service
+          register: focalboard_postgres_service
+          until: focalboard_postgres_service.status.ActiveState == 'active'
+          retries: 36
+          delay: 5
+          # So that giving up is reported by the assertion below rather than as a
+          # wall of systemd unit properties.
+          failed_when: false
 
-    # `Restart=always` in the systemd unit means that even a container which crashes
-    # and gets restarted reads as active here, so this is a precondition rather than
-    # a result.
-    - name: Assert the Postgres systemd service is active
-      ansible.builtin.assert:
-        that: focalboard_postgres_service.status.ActiveState == 'active'
-        fail_msg: "postgres.service is not active ({{ focalboard_postgres_service.status.ActiveState }})"
-        success_msg: "postgres.service is active"
+        # `Restart=always` in the systemd unit means that even a container which crashes
+        # and gets restarted reads as active here, so this is a precondition rather than
+        # a result.
+        - name: Assert the Postgres systemd service is active
+          ansible.builtin.assert:
+            that: focalboard_postgres_service.status.ActiveState == 'active'
+            fail_msg: "postgres.service is not active ({{ focalboard_postgres_service.status.ActiveState }})"
+            success_msg: "postgres.service is active"
 
-    - name: Run the checks shared by all Focalboard scenarios
-      ansible.builtin.include_tasks:
-        file: "{{ lookup('ansible.builtin.env', 'MOLECULE_PROJECT_DIRECTORY') }}/molecule/verify_tasks.yml"
+        - name: Run the checks shared by all Focalboard scenarios
+          ansible.builtin.include_tasks:
+            file: "{{ lookup('ansible.builtin.env', 'MOLECULE_PROJECT_DIRECTORY') }}/molecule/verify_tasks.yml"
 
-    # A scenario named after a backend is no proof that the application ended
-    # up using it: with `focalboard_database_type` silently falling back to
-    # SQLite, everything above would still pass. So the board is looked for in
-    # Postgres itself. Focalboard names its tables without a prefix, hence the
-    # bare `boards`. The docker CLI is invoked directly, because the lint
-    # environment used in CI has no collections beyond ansible-core available.
-    - name: Count the records of the board in the Postgres database
-      ansible.builtin.command:
-        cmd: >-
-          docker exec -e PGPASSWORD={{ focalboard_database_password | quote }}
-          {{ postgres_identifier | default('postgres') }}
-          psql -U {{ focalboard_database_username | quote }} -d {{ focalboard_database_name | quote }}
-          -tAc "SELECT count(*) FROM boards WHERE id = '{{ focalboard_board_create.json.id }}'"
-      register: focalboard_database_records
-      changed_when: false
-      failed_when: false
-      until: focalboard_database_records.rc == 0 and (focalboard_database_records.stdout | trim | int) > 0
-      retries: 12
-      delay: 5
+        # A scenario named after a backend is no proof that the application ended
+        # up using it: with `focalboard_database_type` silently falling back to
+        # SQLite, everything above would still pass. So the board is looked for in
+        # Postgres itself. Focalboard names its tables without a prefix, hence the
+        # bare `boards`. The docker CLI is invoked directly, because the lint
+        # environment used in CI has no collections beyond ansible-core available.
+        - name: Count the records of the board in the Postgres database
+          ansible.builtin.command:
+            cmd: >-
+              docker exec -e PGPASSWORD={{ focalboard_database_password | quote }}
+              {{ postgres_identifier | default('postgres') }}
+              psql -U {{ focalboard_database_username | quote }} -d {{ focalboard_database_name | quote }}
+              -tAc "SELECT count(*) FROM boards WHERE id = '{{ focalboard_board_create.json.id }}'"
+          register: focalboard_database_records
+          changed_when: false
+          failed_when: false
+          until: focalboard_database_records.rc == 0 and (focalboard_database_records.stdout | trim | int) > 0
+          retries: 12
+          delay: 5
 
-    - name: Assert the board was persisted into the Postgres database
-      ansible.builtin.assert:
-        that: (focalboard_database_records.stdout | trim | int) > 0
-        fail_msg: >-
-          The Postgres database '{{ focalboard_database_name }}' holds no record of board
-          '{{ focalboard_board_create.json.id }}' - Focalboard is not storing boards in it
-          ({{ focalboard_database_records.stderr | default('no error output') | trim }})
-        success_msg: >-
-          The Postgres database '{{ focalboard_database_name }}' holds
-          {{ focalboard_database_records.stdout | trim }} record(s) of the board that was created
+        - name: Assert the board was persisted into the Postgres database
+          ansible.builtin.assert:
+            that: (focalboard_database_records.stdout | trim | int) > 0
+            fail_msg: >-
+              The Postgres database '{{ focalboard_database_name }}' holds no record of board
+              '{{ focalboard_board_create.json.id }}' - Focalboard is not storing boards in it
+              ({{ focalboard_database_records.stderr | default('no error output') | trim }})
+            success_msg: >-
+              The Postgres database '{{ focalboard_database_name }}' holds
+              {{ focalboard_database_records.stdout | trim }} record(s) of the board that was created
 
-    # The SQLite fallback would put a database file in the role's data path.
-    # Its absence is what tells a Postgres-backed Focalboard apart from one
-    # that writes to both, or from one whose Postgres rows are left over from
-    # an earlier run of a different scenario.
-    - name: Stat the SQLite database that a Postgres-backed Focalboard must not create
-      ansible.builtin.stat:
-        path: /focalboard/data/focalboard.db
-      register: focalboard_sqlite_database
+        # The SQLite fallback would put a database file in the role's data path.
+        # Its absence is what tells a Postgres-backed Focalboard apart from one
+        # that writes to both, or from one whose Postgres rows are left over from
+        # an earlier run of a different scenario.
+        - name: Stat the SQLite database that a Postgres-backed Focalboard must not create
+          ansible.builtin.stat:
+            path: /focalboard/data/focalboard.db
+          register: focalboard_sqlite_database
 
-    - name: Assert Focalboard did not fall back to SQLite
-      ansible.builtin.assert:
-        that: not focalboard_sqlite_database.stat.exists
-        fail_msg: "Focalboard created a SQLite database at /focalboard/data/focalboard.db despite being configured for Postgres"
-        success_msg: "Focalboard created no SQLite database, as expected for a Postgres-backed instance"
+        - name: Assert Focalboard did not fall back to SQLite
+          ansible.builtin.assert:
+            that: not focalboard_sqlite_database.stat.exists
+            fail_msg: "Focalboard created a SQLite database at /focalboard/data/focalboard.db despite being configured for Postgres"
+            success_msg: "Focalboard created no SQLite database, as expected for a Postgres-backed instance"
 
-    - name: Show the Focalboard verification summary
-      vars:
-        focalboard_container: "{{ focalboard_inspect.stdout | from_json | first }}"
-      ansible.builtin.debug:
-        msg:
-          - "Focalboard systemd: {{ focalboard_service.status.ActiveState }}"
-          - "Focalboard image: {{ focalboard_container.Config.Image }}"
-          - "Focalboard web interface: {{ focalboard_endpoint.status }}"
-          - "Focalboard telemetry: {{ focalboard_client_config.json.telemetry }}"
-          - "Focalboard board: {{ focalboard_board_read.json.id }} ({{ focalboard_board_read.json.title }})"
-          - "Focalboard board rows in Postgres: {{ focalboard_database_records.stdout | trim }}"
-          - "Postgres systemd: {{ focalboard_postgres_service.status.ActiveState }}"
+        - name: Show the Focalboard verification summary
+          vars:
+            focalboard_container: "{{ focalboard_inspect.stdout | from_json | first }}"
+          ansible.builtin.debug:
+            msg:
+              - "Focalboard systemd: {{ focalboard_service.status.ActiveState }}"
+              - "Focalboard image: {{ focalboard_container.Config.Image }}"
+              - "Focalboard web interface: {{ focalboard_endpoint.status }}"
+              - "Focalboard telemetry: {{ focalboard_client_config.json.telemetry }}"
+              - "Focalboard board: {{ focalboard_board_read.json.id }} ({{ focalboard_board_read.json.title }})"
+              - "Focalboard board rows in Postgres: {{ focalboard_database_records.stdout | trim }}"
+              - "Postgres systemd: {{ focalboard_postgres_service.status.ActiveState }}"
 
       rescue:
         # Whatever went wrong, the reason is almost always in the systemd service log.

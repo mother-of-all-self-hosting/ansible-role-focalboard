@@ -23,40 +23,40 @@
   tasks:
     - name: Verify that Focalboard works
       block:
-    - name: Run the checks shared by all Focalboard scenarios
-      ansible.builtin.include_tasks:
-        file: "{{ lookup('ansible.builtin.env', 'MOLECULE_PROJECT_DIRECTORY') }}/molecule/verify_tasks.yml"
+        - name: Run the checks shared by all Focalboard scenarios
+          ansible.builtin.include_tasks:
+            file: "{{ lookup('ansible.builtin.env', 'MOLECULE_PROJECT_DIRECTORY') }}/molecule/verify_tasks.yml"
 
-    # This scenario runs on SQLite, and the role's config.json points the
-    # database at `/data/focalboard.db` inside the container, which is the
-    # role's data path on the host. The image's own config.json would instead
-    # have put it under `/opt/focalboard/data`, inside the container and lost
-    # on restart, so finding the file here confirms the database landed where
-    # the role configured it rather than merely somewhere.
-    - name: Stat the Focalboard SQLite database on the host
-      ansible.builtin.stat:
-        path: /focalboard/data/focalboard.db
-      register: focalboard_sqlite_database
+        # This scenario runs on SQLite, and the role's config.json points the
+        # database at `/data/focalboard.db` inside the container, which is the
+        # role's data path on the host. The image's own config.json would instead
+        # have put it under `/opt/focalboard/data`, inside the container and lost
+        # on restart, so finding the file here confirms the database landed where
+        # the role configured it rather than merely somewhere.
+        - name: Stat the Focalboard SQLite database on the host
+          ansible.builtin.stat:
+            path: /focalboard/data/focalboard.db
+          register: focalboard_sqlite_database
 
-    - name: Assert the SQLite database was created in the role's data path
-      ansible.builtin.assert:
-        that:
-          - focalboard_sqlite_database.stat.exists
-          - focalboard_sqlite_database.stat.size > 0
-        fail_msg: "No SQLite database at /focalboard/data/focalboard.db"
-        success_msg: "The SQLite database is at /focalboard/data/focalboard.db ({{ focalboard_sqlite_database.stat.size | default(0) }} bytes)"
+        - name: Assert the SQLite database was created in the role's data path
+          ansible.builtin.assert:
+            that:
+              - focalboard_sqlite_database.stat.exists
+              - focalboard_sqlite_database.stat.size > 0
+            fail_msg: "No SQLite database at /focalboard/data/focalboard.db"
+            success_msg: "The SQLite database is at /focalboard/data/focalboard.db ({{ focalboard_sqlite_database.stat.size | default(0) }} bytes)"
 
-    - name: Show the Focalboard verification summary
-      vars:
-        focalboard_container: "{{ focalboard_inspect.stdout | from_json | first }}"
-      ansible.builtin.debug:
-        msg:
-          - "Focalboard systemd: {{ focalboard_service.status.ActiveState }}"
-          - "Focalboard image: {{ focalboard_container.Config.Image }}"
-          - "Focalboard web interface: {{ focalboard_endpoint.status }}"
-          - "Focalboard telemetry: {{ focalboard_client_config.json.telemetry }}"
-          - "Focalboard board: {{ focalboard_board_read.json.id }} ({{ focalboard_board_read.json.title }})"
-          - "Focalboard SQLite database: {{ focalboard_sqlite_database.stat.size }} bytes"
+        - name: Show the Focalboard verification summary
+          vars:
+            focalboard_container: "{{ focalboard_inspect.stdout | from_json | first }}"
+          ansible.builtin.debug:
+            msg:
+              - "Focalboard systemd: {{ focalboard_service.status.ActiveState }}"
+              - "Focalboard image: {{ focalboard_container.Config.Image }}"
+              - "Focalboard web interface: {{ focalboard_endpoint.status }}"
+              - "Focalboard telemetry: {{ focalboard_client_config.json.telemetry }}"
+              - "Focalboard board: {{ focalboard_board_read.json.id }} ({{ focalboard_board_read.json.title }})"
+              - "Focalboard SQLite database: {{ focalboard_sqlite_database.stat.size }} bytes"
 
       rescue:
         # Whatever went wrong, the reason is almost always in the systemd service log.
