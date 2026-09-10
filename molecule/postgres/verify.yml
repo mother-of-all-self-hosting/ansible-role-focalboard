@@ -20,28 +20,39 @@
       Content-Type: application/json
       X-Requested-With: XMLHttpRequest
 
+    focalboard_verify_units:
+      - postgres.service
+      - focalboard.service
+
   tasks:
     - name: Verify that Focalboard works
       block:
-        - name: Wait for the Postgres systemd service to become active (up to 180s)
+        - name: Wait for the Focalboard systemd services to become active (up to 180s each)
           ansible.builtin.systemd_service:
-            name: postgres.service
-          register: focalboard_postgres_service
-          until: focalboard_postgres_service.status.ActiveState == 'active'
+            name: "{{ item }}"
+          register: focalboard_services
+          until: focalboard_services.status.ActiveState == 'active'
           retries: 36
           delay: 5
-          # So that giving up is reported by the assertion below rather than as a
-          # wall of systemd unit properties.
-          failed_when: false
+          loop: "{{ focalboard_verify_units }}"
 
         # `Restart=always` in the systemd unit means that even a container which crashes
         # and gets restarted reads as active here, so this is a precondition rather than
         # a result.
-        - name: Assert the Postgres systemd service is active
+        - name: Assert the Focalboard systemd services are active
           ansible.builtin.assert:
-            that: focalboard_postgres_service.status.ActiveState == 'active'
-            fail_msg: "postgres.service is not active ({{ focalboard_postgres_service.status.ActiveState }})"
-            success_msg: "postgres.service is active"
+            that: focalboard_services.results | map(attribute='status.ActiveState') | unique | list == ['active']
+            fail_msg: >-
+              Not every service is active:
+              {{ dict(focalboard_verify_units | zip(focalboard_services.results | map(attribute='status.ActiveState'))) }}
+            success_msg: "Both the Postgres and the Focalboard systemd services are active"
+
+        - name: Retrieve the Focalboard systemd services log for debugging
+          when: focalboard_debug_service_enabled | bool
+          ansible.builtin.command:
+            cmd: "journalctl --no-pager --output=cat --unit={{ item }}"
+          changed_when: false
+          loop: "{{ focalboard_verify_units }}"
 
         - name: Run the checks shared by all Focalboard scenarios
           ansible.builtin.include_tasks:
@@ -98,13 +109,12 @@
             focalboard_container: "{{ focalboard_inspect.stdout | from_json | first }}"
           ansible.builtin.debug:
             msg:
-              - "Focalboard systemd: {{ focalboard_service.status.ActiveState }}"
+              - "Focalboard systemd: {{ dict(focalboard_verify_units | zip(focalboard_services.results | map(attribute='status.ActiveState'))) }}"
               - "Focalboard image: {{ focalboard_container.Config.Image }}"
               - "Focalboard web interface: {{ focalboard_endpoint.status }}"
               - "Focalboard telemetry: {{ focalboard_client_config.json.telemetry }}"
               - "Focalboard board: {{ focalboard_board_read.json.id }} ({{ focalboard_board_read.json.title }})"
               - "Focalboard board rows in Postgres: {{ focalboard_database_records.stdout | trim }}"
-              - "Postgres systemd: {{ focalboard_postgres_service.status.ActiveState }}"
 
       rescue:
         # Whatever went wrong, the reason is almost always in the systemd service log.
