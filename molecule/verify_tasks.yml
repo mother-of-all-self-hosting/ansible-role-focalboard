@@ -13,13 +13,14 @@
     file: "{{ lookup('env', 'MOLECULE_PROJECT_DIRECTORY') }}/defaults/main.yml"
     name: focalboard_defaults
 
-- name: Wait for the Focalboard systemd service to become active (up to 180s)
+- name: Wait for the Focalboard systemd services to become active (up to 180s each)
   ansible.builtin.systemd_service:
-    name: focalboard.service
-  register: focalboard_service
-  until: focalboard_service.status.ActiveState == 'active'
+    name: "{{ item }}"
+  register: focalboard_services
+  until: focalboard_services.status.ActiveState == 'active'
   retries: 36
   delay: 5
+  loop: "{{ focalboard_verify_units }}"
   # So that giving up is reported by the assertion below rather than as a
   # wall of systemd unit properties.
   failed_when: false
@@ -27,17 +28,20 @@
 # `Restart=always` in the systemd unit means that even a container which crashes
 # and gets restarted reads as active here, so this is a precondition rather than
 # a result.
-- name: Assert the Focalboard systemd service is active
+- name: Assert the Focalboard systemd services are active
   ansible.builtin.assert:
-    that: focalboard_service.status.ActiveState == 'active'
-    fail_msg: "focalboard.service is not active ({{ focalboard_service.status.ActiveState }})"
-    success_msg: "focalboard.service is active"
+    that: focalboard_services.results | map(attribute='status.ActiveState') | unique | list == ['active']
+    fail_msg: >-
+      Not every service is active:
+      {{ dict(focalboard_verify_units | zip(focalboard_services.results | map(attribute='status.ActiveState'))) }}
+    success_msg: "Every systemd service is active"
 
-- name: Retrieve the Focalboard systemd service log for debugging
+- name: Retrieve the Focalboard systemd services log for debugging
   when: focalboard_debug_service_enabled | bool
   ansible.builtin.command:
-    cmd: journalctl --no-pager --output=cat --unit=focalboard.service
+    cmd: "journalctl --no-pager --output=cat --unit={{ item }}"
   changed_when: false
+  loop: "{{ focalboard_verify_units }}"
 
 # A systemd unit reporting `active` only says the `docker start` in it has
 # not returned yet. Asking Docker what is actually running is what ties the

@@ -27,33 +27,6 @@
   tasks:
     - name: Verify that Focalboard works
       block:
-        - name: Wait for the Focalboard systemd services to become active (up to 180s each)
-          ansible.builtin.systemd_service:
-            name: "{{ item }}"
-          register: focalboard_services
-          until: focalboard_services.status.ActiveState == 'active'
-          retries: 36
-          delay: 5
-          loop: "{{ focalboard_verify_units }}"
-
-        # `Restart=always` in the systemd unit means that even a container which crashes
-        # and gets restarted reads as active here, so this is a precondition rather than
-        # a result.
-        - name: Assert the Focalboard systemd services are active
-          ansible.builtin.assert:
-            that: focalboard_services.results | map(attribute='status.ActiveState') | unique | list == ['active']
-            fail_msg: >-
-              Not every service is active:
-              {{ dict(focalboard_verify_units | zip(focalboard_services.results | map(attribute='status.ActiveState'))) }}
-            success_msg: "Both the Postgres and the Focalboard systemd services are active"
-
-        - name: Retrieve the Focalboard systemd services log for debugging
-          when: focalboard_debug_service_enabled | bool
-          ansible.builtin.command:
-            cmd: "journalctl --no-pager --output=cat --unit={{ item }}"
-          changed_when: false
-          loop: "{{ focalboard_verify_units }}"
-
         - name: Run the checks shared by all Focalboard scenarios
           ansible.builtin.include_tasks:
             file: "{{ lookup('ansible.builtin.env', 'MOLECULE_PROJECT_DIRECTORY') }}/molecule/verify_tasks.yml"
@@ -109,7 +82,7 @@
             focalboard_container: "{{ focalboard_inspect.stdout | from_json | first }}"
           ansible.builtin.debug:
             msg:
-              - "Focalboard systemd: {{ dict(focalboard_verify_units | zip(focalboard_services.results | map(attribute='status.ActiveState'))) }}"
+              - "Focalboard systemd: {% for unit, state in focalboard_verify_units | zip(focalboard_services.results | map(attribute='status.ActiveState')) %}{{ unit }} ({{ state }}){% if not loop.last %}, {% endif %}{% endfor %}"
               - "Focalboard image: {{ focalboard_container.Config.Image }}"
               - "Focalboard web interface: {{ focalboard_endpoint.status }}"
               - "Focalboard telemetry: {{ focalboard_client_config.json.telemetry }}"

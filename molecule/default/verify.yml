@@ -20,6 +20,9 @@
       Content-Type: application/json
       X-Requested-With: XMLHttpRequest
 
+    focalboard_verify_units:
+      - focalboard.service
+
   tasks:
     - name: Verify that Focalboard works
       block:
@@ -51,7 +54,7 @@
             focalboard_container: "{{ focalboard_inspect.stdout | from_json | first }}"
           ansible.builtin.debug:
             msg:
-              - "Focalboard systemd: {{ focalboard_service.status.ActiveState }}"
+              - "Focalboard systemd: {% for unit, state in focalboard_verify_units | zip(focalboard_services.results | map(attribute='status.ActiveState')) %}{{ unit }} ({{ state }}){% if not loop.last %}, {% endif %}{% endfor %}"
               - "Focalboard image: {{ focalboard_container.Config.Image }}"
               - "Focalboard web interface: {{ focalboard_endpoint.status }}"
               - "Focalboard telemetry: {{ focalboard_client_config.json.telemetry }}"
