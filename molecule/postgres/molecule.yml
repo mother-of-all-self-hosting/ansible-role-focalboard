@@ -30,6 +30,7 @@ provisioner:
       all:
         # Helper variables
         focalboard_debug_service_enabled: false
+        focalboard_restarts_check_enabled: true
 
         # Variables for Focalboard
         focalboard_uid: 1000
