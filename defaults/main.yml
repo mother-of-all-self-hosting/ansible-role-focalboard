@@ -118,6 +118,12 @@ focalboard_container_extra_arguments: "{{ focalboard_container_extra_arguments_a
 focalboard_container_extra_arguments_auto: []
 focalboard_container_extra_arguments_custom: []
 
+# A list of extra arguments to pass to the process inside the container
+# Example: ['--SOME_ARGUMENT']
+focalboard_process_extra_arguments: "{{ focalboard_process_extra_arguments_auto + focalboard_process_extra_arguments_custom }}"
+focalboard_process_extra_arguments_auto: []
+focalboard_process_extra_arguments_custom: []
+
 # Specifies the value of the `X-XSS-Protection` header
 # Stops pages from loading when they detect reflected cross-site scripting (XSS) attacks.
 #
