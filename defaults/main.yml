@@ -216,7 +216,7 @@ focalboard_container_cleanup_command: |
 
 # Specify a database driver to use
 # Valid values: postgres, sqlite
-focalboard_database_type: sqlite
+focalboard_database_type: ""
 
 # Specify database configuration
 focalboard_database_hostname: ""

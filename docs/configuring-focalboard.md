@@ -27,7 +27,7 @@ See the project's [documentation](https://github.com/mattermost-community/focalb
 
 ## Prerequisites
 
-To run a Focalboard instance it is necessary to prepare a database. You can use a [Postgres](https://www.postgresql.org/) database server or [SQLite](https://www.sqlite.org/). By default it is configured to use SQLite.
+To run a Focalboard instance it is necessary to prepare a database. You can use a [Postgres](https://www.postgresql.org/) database server or [SQLite](https://www.sqlite.org/).
 
 If you are looking for an Ansible role for Postgres, you can check out [this role (ansible-role-postgres)](https://github.com/mother-of-all-self-hosting/ansible-role-postgres) maintained by the [Mother-of-All-Self-Hosting (MASH)](https://github.com/mother-of-all-self-hosting) team.
 
@@ -65,20 +65,24 @@ After adjusting the hostname, make sure to adjust your DNS records to point the 
 
 **Note**: hosting Focalboard under a subpath does not seem to be possible due to Focalboard's technical limitations.
 
-### Set variables for the database server
+### Configuring database
 
-To have the Focalboard instance connect to your Postgres server, add the following configuration to your `vars.yml` file.
+#### Specify database
+
+Focalboard can use either Postgres or SQLite, and you need to choose one.
+
+To use Postgres, add the following configuration to your `vars.yml` file:
 
 ```yaml
 focalboard_database_type: postgres
-focalboard_database_hostname: YOUR_POSTGRES_SERVER_HOSTNAME_HERE
-focalboard_database_port: 5432
-focalboard_database_name: YOUR_POSTGRES_SERVER_DATABASE_NAME_HERE
-focalboard_database_username: YOUR_POSTGRES_SERVER_USERNAME_HERE
-focalboard_database_password: YOUR_POSTGRES_SERVER_PASSWORD_HERE
 ```
 
-Make sure to replace the placeholders with your own values.
+Set `sqlite` to use SQLite. The SQLite database is stored in the directory specified with `focalboard_data_path`.
+
+For other settings, check variables such as `focalboard_database_*` on [`defaults/main.yml`](../defaults/main.yml).
+
+>[!NOTE]
+> If you (or your playbook) have not specified Postgres explicitly, the database for your existing installation is most likely to be `sqlite`.
 
 ### Extending the configuration
 
