@@ -51,8 +51,8 @@ provisioner:
         focalboard_database_type: postgres
         focalboard_database_hostname: "{{ postgres_connection_hostname }}"
         focalboard_database_port: "{{ postgres_connection_port }}"
-        focalboard_database_username: /#@my_database_username?%
-        focalboard_database_password: /#@my_database_password?%
+        focalboard_database_username: my_database_username
+        focalboard_database_password: my_database_password
         focalboard_database_name: focalboard
         focalboard_systemd_required_services_list_auto: |
           {{

@@ -39,14 +39,22 @@
       focalboard_database_type must be 'postgres' or 'sqlite'
   when: "focalboard_database_type not in ['postgres', 'sqlite']"
 
-- name: Fail if required Focalboard + Postgres integration settings not defined
-  ansible.builtin.fail:
-    msg: >-
-      You need to define a required configuration setting (`{{ item }}`) when `focalboard_database_type` is `postgres`
-  when: "focalboard_database_type == 'postgres' and lookup('vars', item, default='') | string | length == 0"
-  with_items:
-    - focalboard_database_hostname
-    - focalboard_database_password
+- name: Run if Focalboard + Postgres integration is enabled
+  when: focalboard_database_type == 'postgres'
+  block:
+    - name: Fail if required Focalboard + Postgres integration settings not defined
+      ansible.builtin.fail:
+        msg: >-
+          You need to define a required configuration setting (`{{ item }}`) when `focalboard_database_type` is `postgres`
+      when: "lookup('vars', item, default='') | string | length == 0"
+      with_items:
+        - focalboard_database_hostname
+        - focalboard_database_password
+
+    - name: Fail if Postgres database password contains disallowed characters
+      ansible.builtin.fail:
+        msg: "focalboard_database_password contains unallowed characters."
+      when: focalboard_database_password is not match('^[A-Za-z0-9_.-]+$')
 
 - name: Run if Traefik is enabled
   when: focalboard_container_labels_traefik_enabled | bool
